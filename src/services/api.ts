@@ -54,7 +54,7 @@ interface QuizAttemptWithDetails {
     subjects: {
       title: string;
     };
-  };
+  } | null;
 }
 
 export interface Flashcard {
@@ -231,9 +231,11 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
     return [];
   }
   
-  // Transform data for UI
-  return (quizAttempts || []).map((attempt) => {
-    const quiz = attempt.quizzes || {};
+  // Transform data for UI with proper type handling
+  return (quizAttempts || []).map((attempt: QuizAttemptWithDetails) => {
+    // Define the quiz with proper typing to avoid TypeScript errors
+    const quiz = attempt.quizzes || { subjects: { title: 'Unknown Subject' }, title: 'Unknown Quiz' };
+    
     return {
       type: 'quiz',
       subject: quiz.subjects?.title || 'Unknown Subject',
