@@ -204,8 +204,8 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   // Transform data for UI
   return (quizAttempts || []).map(attempt => ({
     type: 'quiz',
-    subject: attempt.quizzes.subjects.title,
-    title: attempt.quizzes.title,
+    subject: attempt.quizzes.subjects ? attempt.quizzes.subjects.title : 'Unknown Subject',
+    title: attempt.quizzes ? attempt.quizzes.title : 'Unknown Quiz',
     timestamp: new Date(attempt.completed_at).toLocaleString(),
     score: attempt.score,
   }));
