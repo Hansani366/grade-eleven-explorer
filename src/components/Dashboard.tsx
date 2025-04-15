@@ -35,22 +35,23 @@ const Dashboard = () => {
     },
   ];
 
+  // Fixed the type property to use the literal string union types expected by the Activity interface
   const recentActivities = [
     {
-      type: 'quiz',
+      type: 'quiz' as const,
       subject: 'Physics',
       title: 'Motion and Forces Quiz',
       timestamp: '2h ago',
       score: 85,
     },
     {
-      type: 'note',
+      type: 'note' as const,
       subject: 'Literature',
       title: 'Essay Structure Notes',
       timestamp: '1d ago',
     },
     {
-      type: 'practice',
+      type: 'practice' as const,
       subject: 'Mathematics',
       title: 'Calculus Practice',
       timestamp: '2d ago',
