@@ -42,6 +42,21 @@ export interface QuizAttempt {
   completed_at: string;
 }
 
+// Add a specific type for the quiz attempts with nested data
+interface QuizAttemptWithDetails {
+  id: number;
+  score: number;
+  completed_at: string;
+  quizzes: {
+    id: number;
+    title: string;
+    subject_id: number;
+    subjects: {
+      title: string;
+    };
+  };
+}
+
 export interface Flashcard {
   id: number;
   subject_id: number;
@@ -202,10 +217,10 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   }
   
   // Transform data for UI
-  return (quizAttempts || []).map(attempt => ({
+  return (quizAttempts || []).map((attempt: QuizAttemptWithDetails) => ({
     type: 'quiz',
-    subject: attempt.quizzes.subjects ? attempt.quizzes.subjects.title : 'Unknown Subject',
-    title: attempt.quizzes ? attempt.quizzes.title : 'Unknown Quiz',
+    subject: attempt.quizzes?.subjects?.title || 'Unknown Subject',
+    title: attempt.quizzes?.title || 'Unknown Quiz',
     timestamp: new Date(attempt.completed_at).toLocaleString(),
     score: attempt.score,
   }));
