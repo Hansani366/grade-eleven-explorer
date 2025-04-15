@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 // Types
 export interface Profile {
@@ -66,6 +66,11 @@ export interface Flashcard {
 
 // API functions
 export const getProfile = async (): Promise<Profile | null> => {
+  if (!isSupabaseConfigured()) {
+    console.error('Supabase is not configured. Cannot fetch profile.');
+    return null;
+  }
+  
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return null;
@@ -85,6 +90,11 @@ export const getProfile = async (): Promise<Profile | null> => {
 };
 
 export const getSubjects = async (): Promise<Subject[]> => {
+  if (!isSupabaseConfigured()) {
+    console.error('Supabase is not configured. Cannot fetch subjects.');
+    return [];
+  }
+  
   const { data, error } = await supabase
     .from('subjects')
     .select('*')
@@ -196,6 +206,11 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<Flashca
 };
 
 export const getRecentActivities = async (limit: number = 5): Promise<any[]> => {
+  if (!isSupabaseConfigured()) {
+    console.error('Supabase is not configured. Cannot fetch recent activities.');
+    return [];
+  }
+  
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return [];
@@ -217,11 +232,14 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   }
   
   // Transform data for UI
-  return (quizAttempts || []).map((attempt: QuizAttemptWithDetails) => ({
-    type: 'quiz',
-    subject: attempt.quizzes?.subjects?.title || 'Unknown Subject',
-    title: attempt.quizzes?.title || 'Unknown Quiz',
-    timestamp: new Date(attempt.completed_at).toLocaleString(),
-    score: attempt.score,
-  }));
+  return (quizAttempts || []).map((attempt) => {
+    const quiz = attempt.quizzes || {};
+    return {
+      type: 'quiz',
+      subject: quiz.subjects?.title || 'Unknown Subject',
+      title: quiz.title || 'Unknown Quiz',
+      timestamp: new Date(attempt.completed_at).toLocaleString(),
+      score: attempt.score,
+    };
+  });
 };
