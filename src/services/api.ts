@@ -43,6 +43,7 @@ export interface QuizAttempt {
 }
 
 // Add a specific type for the quiz attempts with nested data
+// Update the interface to match the actual structure returned by Supabase
 interface QuizAttemptWithDetails {
   id: number;
   score: number;
@@ -53,8 +54,8 @@ interface QuizAttemptWithDetails {
     subject_id: number;
     subjects: {
       title: string;
-    };
-  } | null;
+    }[];
+  }[];
 }
 
 export interface Flashcard {
@@ -232,13 +233,14 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   }
   
   // Transform data for UI with proper type handling
-  return (quizAttempts || []).map((attempt: QuizAttemptWithDetails) => {
-    // Define the quiz with proper typing to avoid TypeScript errors
-    const quiz = attempt.quizzes || { subjects: { title: 'Unknown Subject' }, title: 'Unknown Quiz' };
+  return (quizAttempts || []).map((attempt: any) => {
+    // Get the first quiz and subject if they exist
+    const quiz = attempt.quizzes?.[0] || {};
+    const subject = quiz.subjects?.[0] || {};
     
     return {
       type: 'quiz',
-      subject: quiz.subjects?.title || 'Unknown Subject',
+      subject: subject.title || 'Unknown Subject',
       title: quiz.title || 'Unknown Quiz',
       timestamp: new Date(attempt.completed_at).toLocaleString(),
       score: attempt.score,
