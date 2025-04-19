@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import QuizCard from './QuizCard';
@@ -264,19 +265,20 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Update fallback quiz cards to include required id prop and remove onClick */}
                   <QuizCard
+                    id={1}
                     title="Algebra Fundamentals"
                     description="Test your understanding of basic algebraic concepts"
                     timeMinutes={15}
                     questionCount={10}
-                    onClick={() => console.log("Starting Algebra quiz")}
                   />
                   <QuizCard
+                    id={2}
                     title="Literature Analysis"
                     description="Analyze passages from classic literature"
                     timeMinutes={20}
                     questionCount={8}
-                    onClick={() => console.log("Starting Literature quiz")}
                   />
                 </div>
               )}
