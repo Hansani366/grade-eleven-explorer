@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Quiz from "./pages/Quiz"; // We'll create this component
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/quiz/:quizId" 
+              element={
+                <ProtectedRoute>
+                  <Quiz />
                 </ProtectedRoute>
               } 
             />
