@@ -103,7 +103,14 @@ export const getSubjectById = async (id: number): Promise<Subject | null> => {
 export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> => {
   const { data, error } = await supabase
     .from('quizzes')
-    .select()
+    .select(`
+      id,
+      title,
+      description,
+      time_minutes,
+      question_count,
+      subject_id
+    `)
     .eq('subject_id', subjectId);
   
   if (error) {
@@ -142,7 +149,7 @@ export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> 
   
   return (data || []).map(item => ({
     ...item,
-    options: Array.isArray(item.options) ? item.options : []
+    options: Array.isArray(item.options) ? item.options.map(opt => String(opt)) : []
   }));
 };
 

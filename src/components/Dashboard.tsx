@@ -254,11 +254,11 @@ const Dashboard = () => {
                   {displayedQuizzes.slice(0, 4).map((quiz) => (
                     <QuizCard
                       key={quiz.id}
+                      id={quiz.id}
                       title={quiz.title}
                       description={quiz.description}
                       timeMinutes={quiz.time_minutes}
                       questionCount={quiz.question_count}
-                      onClick={() => console.log(`Starting quiz ${quiz.id}`)}
                     />
                   ))}
                 </div>
