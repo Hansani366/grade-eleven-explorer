@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -40,6 +39,17 @@ export interface QuizAttempt {
   quiz_id: number;
   score: number;
   completed_at: string;
+}
+
+export interface QuizSettings {
+  id: string;
+  user_id: string;
+  preferred_subject_ids: number[];
+  difficulty_level: string;
+  time_preference_minutes: number;
+  notifications_enabled: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 // API functions
@@ -130,7 +140,10 @@ export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> 
     return [];
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    options: Array.isArray(item.options) ? item.options : []
+  }));
 };
 
 export const submitQuizAttempt = async (quizId: number, score: number): Promise<boolean> => {
@@ -205,4 +218,43 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
     timestamp: new Date(attempt.completed_at).toLocaleString(),
     score: attempt.score,
   }));
+};
+
+export const getQuizSettings = async (): Promise<QuizSettings | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return null;
+  
+  const { data, error } = await supabase
+    .from('quiz_settings')
+    .select()
+    .eq('user_id', user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching quiz settings:', error);
+    return null;
+  }
+  
+  return data;
+};
+
+export const updateQuizSettings = async (settings: Partial<Omit<QuizSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return false;
+  
+  const { error } = await supabase
+    .from('quiz_settings')
+    .upsert({
+      user_id: user.id,
+      ...settings
+    });
+  
+  if (error) {
+    console.error('Error updating quiz settings:', error);
+    return false;
+  }
+  
+  return true;
 };

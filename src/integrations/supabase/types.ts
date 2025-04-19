@@ -123,6 +123,39 @@ export type Database = {
           },
         ]
       }
+      quiz_settings: {
+        Row: {
+          created_at: string | null
+          difficulty_level: string | null
+          id: string
+          notifications_enabled: boolean | null
+          preferred_subject_ids: number[] | null
+          time_preference_minutes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          notifications_enabled?: boolean | null
+          preferred_subject_ids?: number[] | null
+          time_preference_minutes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          notifications_enabled?: boolean | null
+          preferred_subject_ids?: number[] | null
+          time_preference_minutes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       quizzes: {
         Row: {
           description: string
