@@ -30,17 +30,15 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       
       if (error) throw error;
       
-      // Create student profile in the database
+      // Create profile in the database
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              full_name: name,
-              email: email,
-            }
-          ]);
+          .insert({
+            id: data.user.id,
+            full_name: name,
+            email: email,
+          });
           
         if (profileError) throw profileError;
       }

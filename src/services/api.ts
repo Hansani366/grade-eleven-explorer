@@ -1,5 +1,5 @@
 
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 // Types
 export interface Profile {
@@ -42,43 +42,15 @@ export interface QuizAttempt {
   completed_at: string;
 }
 
-// Add a specific type for the quiz attempts with nested data
-// Update the interface to match the actual structure returned by Supabase
-interface QuizAttemptWithDetails {
-  id: number;
-  score: number;
-  completed_at: string;
-  quizzes: {
-    id: number;
-    title: string;
-    subject_id: number;
-    subjects: {
-      title: string;
-    }[];
-  }[];
-}
-
-export interface Flashcard {
-  id: number;
-  subject_id: number;
-  question: string;
-  answer: string;
-}
-
 // API functions
 export const getProfile = async (): Promise<Profile | null> => {
-  if (!isSupabaseConfigured()) {
-    console.error('Supabase is not configured. Cannot fetch profile.');
-    return null;
-  }
-  
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return null;
   
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select()
     .eq('id', user.id)
     .single();
   
@@ -91,15 +63,9 @@ export const getProfile = async (): Promise<Profile | null> => {
 };
 
 export const getSubjects = async (): Promise<Subject[]> => {
-  if (!isSupabaseConfigured()) {
-    console.error('Supabase is not configured. Cannot fetch subjects.');
-    return [];
-  }
-  
   const { data, error } = await supabase
     .from('subjects')
-    .select('*')
-    .order('title');
+    .select();
   
   if (error) {
     console.error('Error fetching subjects:', error);
@@ -112,7 +78,7 @@ export const getSubjects = async (): Promise<Subject[]> => {
 export const getSubjectById = async (id: number): Promise<Subject | null> => {
   const { data, error } = await supabase
     .from('subjects')
-    .select('*')
+    .select()
     .eq('id', id)
     .single();
   
@@ -127,9 +93,8 @@ export const getSubjectById = async (id: number): Promise<Subject | null> => {
 export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> => {
   const { data, error } = await supabase
     .from('quizzes')
-    .select('*')
-    .eq('subject_id', subjectId)
-    .order('title');
+    .select()
+    .eq('subject_id', subjectId);
   
   if (error) {
     console.error(`Error fetching quizzes for subject ${subjectId}:`, error);
@@ -142,7 +107,7 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
 export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
   const { data, error } = await supabase
     .from('quizzes')
-    .select('*')
+    .select()
     .eq('id', quizId)
     .single();
   
@@ -157,7 +122,7 @@ export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
 export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> => {
   const { data, error } = await supabase
     .from('quiz_questions')
-    .select('*')
+    .select()
     .eq('quiz_id', quizId);
   
   if (error) {
@@ -175,14 +140,12 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   
   const { error } = await supabase
     .from('quiz_attempts')
-    .insert([
-      {
-        user_id: user.id,
-        quiz_id: quizId,
-        score: score,
-        completed_at: new Date().toISOString(),
-      }
-    ]);
+    .insert({
+      user_id: user.id,
+      quiz_id: quizId,
+      score: score,
+      completed_at: new Date().toISOString(),
+    });
   
   if (error) {
     console.error('Error submitting quiz attempt:', error);
@@ -192,10 +155,10 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   return true;
 };
 
-export const getFlashcardsBySubject = async (subjectId: number): Promise<Flashcard[]> => {
+export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> => {
   const { data, error } = await supabase
     .from('flashcards')
-    .select('*')
+    .select()
     .eq('subject_id', subjectId);
   
   if (error) {
@@ -207,11 +170,6 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<Flashca
 };
 
 export const getRecentActivities = async (limit: number = 5): Promise<any[]> => {
-  if (!isSupabaseConfigured()) {
-    console.error('Supabase is not configured. Cannot fetch recent activities.');
-    return [];
-  }
-  
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return [];
@@ -220,8 +178,16 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   const { data: quizAttempts, error: quizError } = await supabase
     .from('quiz_attempts')
     .select(`
-      id, score, completed_at,
-      quizzes:quiz_id (id, title, subject_id, subjects:subject_id(title))
+      id,
+      score,
+      completed_at,
+      quiz:quizzes (
+        id,
+        title,
+        subject:subjects (
+          title
+        )
+      )
     `)
     .eq('user_id', user.id)
     .order('completed_at', { ascending: false })
@@ -232,18 +198,11 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
     return [];
   }
   
-  // Transform data for UI with proper type handling
-  return (quizAttempts || []).map((attempt: any) => {
-    // Get the first quiz and subject if they exist
-    const quiz = attempt.quizzes?.[0] || {};
-    const subject = quiz.subjects?.[0] || {};
-    
-    return {
-      type: 'quiz',
-      subject: subject.title || 'Unknown Subject',
-      title: quiz.title || 'Unknown Quiz',
-      timestamp: new Date(attempt.completed_at).toLocaleString(),
-      score: attempt.score,
-    };
-  });
+  return (quizAttempts || []).map((attempt) => ({
+    type: 'quiz',
+    subject: attempt.quiz?.subject?.title || 'Unknown Subject',
+    title: attempt.quiz?.title || 'Unknown Quiz',
+    timestamp: new Date(attempt.completed_at).toLocaleString(),
+    score: attempt.score,
+  }));
 };
