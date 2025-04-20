@@ -40,7 +40,7 @@ const Dashboard = () => {
         
         // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjectsData.length > 0) {
-          const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
+          const mathSubject = subjectsData.find(s => s.title === 'Mathematics') || subjectsData[0];
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
@@ -106,14 +106,13 @@ const Dashboard = () => {
           description: "History subject",
           progress: 30,
         }
-      ]);
+      ] as Subject[]);
       setActivities(fallbackActivities);
       setFlashcards(fallbackFlashcards);
       setQuizzes([]);
     }
   }, [user, toast]);
   
-  // Fallback activities
   const fallbackActivities: ActivityType[] = [
     {
       type: 'quiz',
@@ -137,7 +136,6 @@ const Dashboard = () => {
     },
   ];
   
-  // Fallback flashcards
   const fallbackFlashcards = [
     {
       question: "What is the slope-intercept form of a linear equation?",
@@ -260,7 +258,6 @@ const Dashboard = () => {
   );
 };
 
-// Helper function to get icons based on subject title
 const getSubjectIcon = (title: string) => {
   switch (title.toLowerCase()) {
     case 'mathematics':

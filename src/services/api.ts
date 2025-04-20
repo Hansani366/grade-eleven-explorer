@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -11,10 +12,10 @@ export interface Profile {
 export interface Subject {
   id: number;
   name: string;
-  title?: string; // Make title optional for compatibility
-  icon?: string; // Make icon optional
-  color?: string; // Make color optional
-  description?: string; // Make description optional
+  title: string; // Make it required since it's used extensively
+  icon: string; // Make it required
+  color: string; // Make it required
+  description: string; // Make it required
   progress?: number; // For tracking progress
 }
 
@@ -84,14 +85,15 @@ export const getSubjects = async (): Promise<Subject[]> => {
     return [];
   }
   
-  // Map database fields to our interface
+  // Map database fields to our interface with all required properties
   return (data || []).map(subject => ({
     id: subject.id,
     name: subject.name,
     title: subject.name, // Use name as title
     icon: 'book-open', // Default icon
     color: getSubjectColor(subject.id), // Generate color based on id
-    description: `${subject.name} subject` // Default description
+    description: `${subject.name} subject`, // Default description
+    progress: 0 // Default progress
   }));
 };
 
@@ -127,7 +129,8 @@ export const getSubjectById = async (id: number): Promise<Subject | null> => {
       title: data.name,
       icon: 'book-open',
       color: getSubjectColor(data.id),
-      description: `${data.name} subject`
+      description: `${data.name} subject`,
+      progress: 0 // Default progress
     };
   }
   
