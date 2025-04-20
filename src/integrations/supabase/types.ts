@@ -11,27 +11,27 @@ export type Database = {
     Tables: {
       flashcards: {
         Row: {
-          answer: string
+          "456": number | null
+          elephant: string
           id: number
           question: string
-          subject_id: number | null
         }
         Insert: {
-          answer: string
+          "456"?: number | null
+          elephant: string
           id?: number
           question: string
-          subject_id?: number | null
         }
         Update: {
-          answer?: string
+          "456"?: number | null
+          elephant?: string
           id?: number
           question?: string
-          subject_id?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "flashcards_subject_id_fkey"
-            columns: ["subject_id"]
+            foreignKeyName: "flashcards_456_fkey"
+            columns: ["456"]
             isOneToOne: false
             referencedRelation: "subjects"
             referencedColumns: ["id"]
@@ -49,7 +49,7 @@ export type Database = {
           avatar_url?: string | null
           email?: string | null
           full_name?: string | null
-          id: string
+          id?: string
         }
         Update: {
           avatar_url?: string | null
@@ -61,30 +61,30 @@ export type Database = {
       }
       quiz_attempts: {
         Row: {
-          completed_at: string
+          "2": number | null
+          "2211-0106": string | null
+          completed: string
           id: number
-          quiz_id: number | null
           score: number
-          user_id: string | null
         }
         Insert: {
-          completed_at?: string
+          "2"?: number | null
+          "2211-0106"?: string | null
+          completed?: string
           id?: number
-          quiz_id?: number | null
           score: number
-          user_id?: string | null
         }
         Update: {
-          completed_at?: string
+          "2"?: number | null
+          "2211-0106"?: string | null
+          completed?: string
           id?: number
-          quiz_id?: number | null
           score?: number
-          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "quiz_attempts_quiz_id_fkey"
-            columns: ["quiz_id"]
+            foreignKeyName: "quiz_attempts_2_fkey"
+            columns: ["2"]
             isOneToOne: false
             referencedRelation: "quizzes"
             referencedColumns: ["id"]
@@ -93,24 +93,33 @@ export type Database = {
       }
       quiz_questions: {
         Row: {
-          correct_answer: string
+          correct_option: string | null
           id: number
-          options: Json
-          question: string
+          option_a: string
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          question_text: string
           quiz_id: number | null
         }
         Insert: {
-          correct_answer: string
+          correct_option?: string | null
           id?: number
-          options: Json
-          question: string
+          option_a: string
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          question_text: string
           quiz_id?: number | null
         }
         Update: {
-          correct_answer?: string
+          correct_option?: string | null
           id?: number
-          options?: Json
-          question?: string
+          option_a?: string
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          question_text?: string
           quiz_id?: number | null
         }
         Relationships: [
@@ -159,59 +168,42 @@ export type Database = {
       quizzes: {
         Row: {
           description: string
+          duration: number
           id: number
-          question_count: number
+          network_id: number | null
+          quiz_code: number
           subject_id: number | null
-          time_minutes: number
-          title: string
         }
         Insert: {
           description: string
+          duration: number
           id?: number
-          question_count: number
+          network_id?: number | null
+          quiz_code: number
           subject_id?: number | null
-          time_minutes: number
-          title: string
         }
         Update: {
           description?: string
+          duration?: number
           id?: number
-          question_count?: number
+          network_id?: number | null
+          quiz_code?: number
           subject_id?: number | null
-          time_minutes?: number
-          title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "quizzes_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "subjects"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       subjects: {
         Row: {
-          color: string
-          description: string
-          icon: string
           id: number
-          title: string
+          name: string
         }
         Insert: {
-          color: string
-          description: string
-          icon: string
           id?: number
-          title: string
+          name: string
         }
         Update: {
-          color?: string
-          description?: string
-          icon?: string
           id?: number
-          title?: string
+          name?: string
         }
         Relationships: []
       }

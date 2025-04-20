@@ -56,6 +56,9 @@ const QuizPage = () => {
         // Load questions
         const questionsData = await getQuizQuestions(Number(quizId));
         setQuestions(questionsData);
+        
+        // Update question count in quiz object
+        setQuiz(prev => prev ? { ...prev, question_count: questionsData.length } : null);
       } catch (error) {
         console.error("Error loading quiz:", error);
         toast({

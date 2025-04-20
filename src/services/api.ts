@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -133,7 +134,19 @@ export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
     return null;
   }
   
-  return data;
+  // Map the returned values to match our interface
+  if (data) {
+    return {
+      id: data.id,
+      title: data.description || 'Untitled Quiz', // Use description field as title if available
+      description: data.description || '',
+      subject_id: data.subject_id || 0,
+      time_minutes: data.duration || 0,
+      question_count: 0, // We'll fetch the questions separately
+    };
+  }
+  
+  return null;
 };
 
 export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> => {
@@ -147,9 +160,18 @@ export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> 
     return [];
   }
   
+  // Format the options and correct answer to match our interface
   return (data || []).map(item => ({
-    ...item,
-    options: Array.isArray(item.options) ? item.options.map(opt => String(opt)) : []
+    id: item.id,
+    quiz_id: item.quiz_id || 0,
+    question: item.question_text || '',
+    options: [
+      item.option_a,
+      item.option_b,
+      item.option_c,
+      item.option_d
+    ].filter(Boolean).map(opt => String(opt || '')),
+    correct_answer: item.correct_option || ''
   }));
 };
 
@@ -161,10 +183,10 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   const { error } = await supabase
     .from('quiz_attempts')
     .insert({
-      user_id: user.id,
-      quiz_id: quizId,
+      "2211-0106": user.id, // Using the column name as it appears in the database
+      "2": quizId, // Using the column name as it appears in the database
       score: score,
-      completed_at: new Date().toISOString(),
+      completed: new Date().toISOString(),
     });
   
   if (error) {
@@ -179,14 +201,17 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> 
   const { data, error } = await supabase
     .from('flashcards')
     .select()
-    .eq('subject_id', subjectId);
+    .eq('456', subjectId); // Using the column name as it appears in the database
   
   if (error) {
     console.error(`Error fetching flashcards for subject ${subjectId}:`, error);
     return [];
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    question: item.question || '',
+    answer: item.elephant || '' // Using elephant field as the answer
+  }));
 };
 
 export const getRecentActivities = async (limit: number = 5): Promise<any[]> => {
@@ -194,37 +219,74 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   
   if (!user) return [];
   
-  // Get recent quiz attempts
-  const { data: quizAttempts, error: quizError } = await supabase
-    .from('quiz_attempts')
-    .select(`
-      id,
-      score,
-      completed_at,
-      quiz:quizzes (
+  try {
+    // Get recent quiz attempts but avoid complex joins that are failing
+    const { data: quizAttempts, error: quizError } = await supabase
+      .from('quiz_attempts')
+      .select(`
         id,
-        title,
-        subject:subjects (
-          title
-        )
-      )
-    `)
-    .eq('user_id', user.id)
-    .order('completed_at', { ascending: false })
-    .limit(limit);
-  
-  if (quizError) {
-    console.error('Error fetching recent activities:', quizError);
+        score,
+        completed,
+        2
+      `)
+      .eq('2211-0106', user.id)
+      .order('completed', { ascending: false })
+      .limit(limit);
+    
+    if (quizError) {
+      console.error('Error fetching recent activities:', quizError);
+      return [];
+    }
+    
+    // Now separately fetch quiz info for each attempt
+    const activities = [];
+    
+    if (quizAttempts && quizAttempts.length > 0) {
+      for (const attempt of quizAttempts) {
+        const quizId = attempt["2"];
+        
+        if (quizId) {
+          // Fetch the quiz info
+          const { data: quizData } = await supabase
+            .from('quizzes')
+            .select(`
+              id,
+              description,
+              subject_id
+            `)
+            .eq('id', quizId)
+            .single();
+            
+          // If found the quiz, fetch subject info
+          let subjectTitle = 'Unknown Subject';
+          if (quizData && quizData.subject_id) {
+            const { data: subjectData } = await supabase
+              .from('subjects')
+              .select('name')
+              .eq('id', quizData.subject_id)
+              .single();
+              
+            if (subjectData) {
+              subjectTitle = subjectData.name;
+            }
+          }
+          
+          activities.push({
+            type: 'quiz',
+            subject: subjectTitle,
+            title: quizData ? quizData.description : 'Unknown Quiz',
+            timestamp: new Date(attempt.completed).toLocaleString(),
+            score: attempt.score,
+          });
+        }
+      }
+    }
+    
+    return activities;
+  } catch (error) {
+    console.error('Error in getRecentActivities:', error);
     return [];
   }
-  
-  return (quizAttempts || []).map((attempt) => ({
-    type: 'quiz',
-    subject: attempt.quiz?.subject?.title || 'Unknown Subject',
-    title: attempt.quiz?.title || 'Unknown Quiz',
-    timestamp: new Date(attempt.completed_at).toLocaleString(),
-    score: attempt.score,
-  }));
 };
 
 export const getQuizSettings = async (): Promise<QuizSettings | null> => {

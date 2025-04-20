@@ -41,7 +41,7 @@ const Dashboard = () => {
         
         // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjectsData.length > 0) {
-          const mathSubject = subjectsData.find(s => s.title === 'Mathematics') || subjectsData[0];
+          const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
@@ -66,84 +66,44 @@ const Dashboard = () => {
     
     if (user) {
       loadDashboardData();
-    } else {
-      // Show sample data if not logged in
-      const subjects = [
-        {
-          title: "Mathematics",
-          icon: <CircleDot className="h-7 w-7" />,
-          progress: 65,
-          color: "bg-edu-purple",
-        },
-        {
-          title: "Physics",
-          icon: <BookOpen className="h-7 w-7" />,
-          progress: 42,
-          color: "bg-blue-500",
-        },
-        {
-          title: "Literature",
-          icon: <BookText className="h-7 w-7" />,
-          progress: 78,
-          color: "bg-green-500",
-        },
-        {
-          title: "History",
-          icon: <GraduationCap className="h-7 w-7" />,
-          progress: 30,
-          color: "bg-amber-500",
-        },
-      ];
+    }
     
-      // Fixed the type property to use the literal string union types expected by the Activity interface
-      const recentActivities = [
-        {
-          type: 'quiz' as const,
-          subject: 'Physics',
-          title: 'Motion and Forces Quiz',
-          timestamp: '2h ago',
-          score: 85,
-        },
-        {
-          type: 'note' as const,
-          subject: 'Literature',
-          title: 'Essay Structure Notes',
-          timestamp: '1d ago',
-        },
-        {
-          type: 'practice' as const,
-          subject: 'Mathematics',
-          title: 'Calculus Practice',
-          timestamp: '2d ago',
-          score: 92,
-        },
-      ];
+    // Show sample data if not logged in or while loading
+    if (!user || loading) {
+      setSubjects(fallbackSubjects);
+      setActivities(fallbackActivities);
+      setFlashcards(fallbackFlashcards);
+      setQuizzes([]);
     }
   }, [user, toast]);
   
   // Fallback data for when no subjects are loaded
   const fallbackSubjects = [
     {
+      id: 1,
       title: "Mathematics",
-      icon: <CircleDot className="h-7 w-7" />,
+      icon: "circle-dot",
       progress: 65,
       color: "bg-edu-purple",
     },
     {
+      id: 2,
       title: "Physics",
-      icon: <BookOpen className="h-7 w-7" />,
+      icon: "book-open",
       progress: 42,
       color: "bg-blue-500",
     },
     {
+      id: 3,
       title: "Literature",
-      icon: <BookText className="h-7 w-7" />,
+      icon: "book-text",
       progress: 78,
       color: "bg-green-500",
     },
     {
+      id: 4,
       title: "History",
-      icon: <GraduationCap className="h-7 w-7" />,
+      icon: "graduation-cap",
       progress: 30,
       color: "bg-amber-500",
     },
@@ -152,20 +112,20 @@ const Dashboard = () => {
   // Fallback activities
   const fallbackActivities: ActivityType[] = [
     {
-      type: 'quiz' as const,
+      type: 'quiz',
       subject: 'Physics',
       title: 'Motion and Forces Quiz',
       timestamp: '2h ago',
       score: 85,
     },
     {
-      type: 'note' as const,
+      type: 'note',
       subject: 'Literature',
       title: 'Essay Structure Notes',
       timestamp: '1d ago',
     },
     {
-      type: 'practice' as const,
+      type: 'practice',
       subject: 'Mathematics',
       title: 'Calculus Practice',
       timestamp: '2d ago',
@@ -265,7 +225,6 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Update fallback quiz cards to include required id prop and remove onClick */}
                   <QuizCard
                     id={1}
                     title="Algebra Fundamentals"
