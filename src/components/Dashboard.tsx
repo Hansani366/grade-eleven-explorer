@@ -121,7 +121,9 @@ const Dashboard = () => {
       </h2>
 
       <section>
-        <h3 className="text-xl font-semibold font-poppins mb-4">Your Subjects</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold font-poppins">Your Subjects</h3>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {subjects.map((subject, i) => (
             <SubjectCard
