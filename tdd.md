@@ -30,15 +30,14 @@ Grade Eleven Explorer is a single-page web application (SPA) hosted on Lovable. 
 ---
 
 
-
 ## 4. API Design
 
-- Supabase auto-generates RESTful APIs for database operations.
-- Data interactions are handled through the `@supabase/supabase-js` SDK.
-  
-**Example Usage:**
+- Supabase auto-generates REST APIs
+- Accessed through the Supabase JS SDK
+
 ```ts
 const { data, error } = await supabase
   .from('resources')
-  .select('*')
+  .select('*');
+
 
