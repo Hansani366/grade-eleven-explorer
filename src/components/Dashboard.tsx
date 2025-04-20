@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BookOpen, BookText, CircleDot, GraduationCap, Download } from 'lucide-react';
+import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { exportToCSV } from '@/utils/csvExport';
 import QuizCard from './QuizCard';
 import SubjectCard from './SubjectCard';
 import RecentActivity from './RecentActivity';
@@ -41,13 +40,11 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjects.length > 0) {
           const mathSubject = subjects.find(s => s.title === 'Mathematics') || subjects[0];
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
-          // Fetch flashcards
           const flashcardsData = await getFlashcardsBySubject(mathSubject.id);
           setFlashcards(flashcardsData.map(f => ({
             question: f.question,
@@ -70,7 +67,6 @@ const Dashboard = () => {
       loadDashboardData();
     }
     
-    // Show sample data if not logged in or while loading
     if (!user || loading) {
       setQuizzes([]);
       setFlashcards(fallbackFlashcards);
@@ -135,19 +131,7 @@ const Dashboard = () => {
       </h2>
 
       <section>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold font-poppins">Your Subjects</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportSubjects}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
-        </div>
-        
+        <h3 className="text-xl font-semibold font-poppins mb-4">Your Subjects</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {subjects.map((subject, i) => (
             <SubjectCard
