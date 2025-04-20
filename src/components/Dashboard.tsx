@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
+import { BookOpen, BookText, CircleDot, GraduationCap, Download } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { exportToCSV } from '@/utils/csvExport';
 import QuizCard from './QuizCard';
 import SubjectCard from './SubjectCard';
 import RecentActivity from './RecentActivity';
@@ -181,6 +183,17 @@ const Dashboard = () => {
     }
   };
 
+  const handleExportSubjects = () => {
+    const exportData = displayedSubjects.map(subject => ({
+      Name: subject.name,
+      Title: subject.title,
+      Progress: subject.progress || 0,
+      Description: subject.description
+    }));
+    
+    exportToCSV(exportData, 'subjects');
+  };
+
   return (
     <div className="p-6 space-y-8">
       <h2 className="text-2xl font-bold font-poppins mb-6">
@@ -188,7 +201,19 @@ const Dashboard = () => {
       </h2>
 
       <section>
-        <h3 className="text-xl font-semibold mb-4 font-poppins">Your Subjects</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold font-poppins">Your Subjects</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportSubjects}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {displayedSubjects.map((subject, i) => (
             <SubjectCard
