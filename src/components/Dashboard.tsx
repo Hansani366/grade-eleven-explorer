@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import QuizCard from './QuizCard';
@@ -70,44 +69,49 @@ const Dashboard = () => {
     
     // Show sample data if not logged in or while loading
     if (!user || loading) {
-      setSubjects(fallbackSubjects);
+      setSubjects([
+        {
+          id: 1,
+          name: "Mathematics",
+          title: "Mathematics",
+          icon: "circle-dot",
+          color: "bg-edu-purple",
+          description: "Mathematics subject",
+          progress: 65,
+        },
+        {
+          id: 2,
+          name: "Physics",
+          title: "Physics",
+          icon: "book-open",
+          color: "bg-blue-500",
+          description: "Physics subject",
+          progress: 42,
+        },
+        {
+          id: 3,
+          name: "Literature", 
+          title: "Literature",
+          icon: "book-text",
+          color: "bg-green-500",
+          description: "Literature subject",
+          progress: 78,
+        },
+        {
+          id: 4,
+          name: "History",
+          title: "History", 
+          icon: "graduation-cap",
+          color: "bg-amber-500",
+          description: "History subject",
+          progress: 30,
+        }
+      ]);
       setActivities(fallbackActivities);
       setFlashcards(fallbackFlashcards);
       setQuizzes([]);
     }
   }, [user, toast]);
-  
-  // Fallback data for when no subjects are loaded
-  const fallbackSubjects = [
-    {
-      id: 1,
-      title: "Mathematics",
-      icon: "circle-dot",
-      progress: 65,
-      color: "bg-edu-purple",
-    },
-    {
-      id: 2,
-      title: "Physics",
-      icon: "book-open",
-      progress: 42,
-      color: "bg-blue-500",
-    },
-    {
-      id: 3,
-      title: "Literature",
-      icon: "book-text",
-      progress: 78,
-      color: "bg-green-500",
-    },
-    {
-      id: 4,
-      title: "History",
-      icon: "graduation-cap",
-      progress: 30,
-      color: "bg-amber-500",
-    },
-  ];
   
   // Fallback activities
   const fallbackActivities: ActivityType[] = [
@@ -149,7 +153,7 @@ const Dashboard = () => {
     },
   ];
   
-  const displayedSubjects = subjects.length > 0 ? subjects : fallbackSubjects;
+  const displayedSubjects = subjects.length > 0 ? subjects : [];
   const displayedActivities = activities.length > 0 ? activities : fallbackActivities;
   const displayedFlashcards = flashcards.length > 0 ? flashcards : fallbackFlashcards;
   const displayedQuizzes = quizzes.length > 0 ? quizzes : [];
@@ -191,8 +195,8 @@ const Dashboard = () => {
           {displayedSubjects.map((subject, i) => (
             <SubjectCard
               key={i}
-              title={subject.title}
-              icon={getSubjectIcon(subject.title)}
+              title={subject.title || subject.name}
+              icon={getSubjectIcon(subject.title || subject.name)}
               progress={subject.progress || 0}
               color={subject.color || "bg-edu-purple"}
               onClick={() => subject.id && handleSubjectClick(subject.id)}

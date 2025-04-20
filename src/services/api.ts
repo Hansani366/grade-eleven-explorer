@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -11,10 +10,12 @@ export interface Profile {
 
 export interface Subject {
   id: number;
-  title: string;
-  icon: string;
-  color: string;
-  description: string;
+  name: string;
+  title?: string; // Make title optional for compatibility
+  icon?: string; // Make icon optional
+  color?: string; // Make color optional
+  description?: string; // Make description optional
+  progress?: number; // For tracking progress
 }
 
 export interface Quiz {
@@ -83,7 +84,28 @@ export const getSubjects = async (): Promise<Subject[]> => {
     return [];
   }
   
-  return data || [];
+  // Map database fields to our interface
+  return (data || []).map(subject => ({
+    id: subject.id,
+    name: subject.name,
+    title: subject.name, // Use name as title
+    icon: 'book-open', // Default icon
+    color: getSubjectColor(subject.id), // Generate color based on id
+    description: `${subject.name} subject` // Default description
+  }));
+};
+
+const getSubjectColor = (id: number): string => {
+  const colors = [
+    'bg-edu-purple',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-amber-500',
+    'bg-red-500',
+    'bg-indigo-500'
+  ];
+  
+  return colors[(id - 1) % colors.length];
 };
 
 export const getSubjectById = async (id: number): Promise<Subject | null> => {
@@ -98,7 +120,18 @@ export const getSubjectById = async (id: number): Promise<Subject | null> => {
     return null;
   }
   
-  return data;
+  if (data) {
+    return {
+      id: data.id,
+      name: data.name,
+      title: data.name,
+      icon: 'book-open',
+      color: getSubjectColor(data.id),
+      description: `${data.name} subject`
+    };
+  }
+  
+  return null;
 };
 
 export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> => {
@@ -106,10 +139,9 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     .from('quizzes')
     .select(`
       id,
-      title,
       description,
-      time_minutes,
-      question_count,
+      duration,
+      quiz_code,
       subject_id
     `)
     .eq('subject_id', subjectId);
@@ -119,7 +151,15 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     return [];
   }
   
-  return data || [];
+  // Map database fields to our interface
+  return (data || []).map(item => ({
+    id: item.id,
+    title: item.description || 'Untitled Quiz', // Use description as title since there's no title field
+    description: item.description || '',
+    subject_id: item.subject_id || 0,
+    time_minutes: item.duration || 0,
+    question_count: 0 // We'll fetch the questions count separately if needed
+  }));
 };
 
 export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
