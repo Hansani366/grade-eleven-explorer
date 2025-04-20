@@ -1,8 +1,8 @@
-name: React CI Pipeline
+name: Vite React CI Pipeline
 
 on:
   push:
-    branches: [ main ] # or your main development branch
+    branches: [ main ]
 
 jobs:
   build:
@@ -15,13 +15,10 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
 
-    - name: Build the app
+    - name: Build the Vite app
       run: npm run build
-
-    - name: Test the app (Optional)
-      run: npm test
