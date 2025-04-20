@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -10,12 +11,10 @@ export interface Profile {
 
 export interface Subject {
   id: number;
-  name: string;
-  title: string; // Make it required since it's used extensively
-  icon: string; // Make it required
-  color: string; // Make it required
-  description: string; // Make it required
-  progress?: number; // For tracking progress
+  title: string;
+  icon: string;
+  color: string;
+  description: string;
 }
 
 export interface Quiz {
@@ -77,45 +76,14 @@ export const getProfile = async (): Promise<Profile | null> => {
 export const getSubjects = async (): Promise<Subject[]> => {
   const { data, error } = await supabase
     .from('subjects')
-    .select('*');
+    .select();
   
   if (error) {
     console.error('Error fetching subjects:', error);
     return [];
   }
   
-  return data;
-};
-
-export const createSubject = async (subject: Omit<Subject, 'id'>): Promise<Subject | null> => {
-  const { data, error } = await supabase
-    .from('subjects')
-    .insert([subject])
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error creating subject:', error);
-    return null;
-  }
-  
-  return data;
-};
-
-export const updateSubject = async (id: number, updates: Partial<Subject>): Promise<Subject | null> => {
-  const { data, error } = await supabase
-    .from('subjects')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error updating subject:', error);
-    return null;
-  }
-  
-  return data;
+  return data || [];
 };
 
 export const getSubjectById = async (id: number): Promise<Subject | null> => {
@@ -130,19 +98,7 @@ export const getSubjectById = async (id: number): Promise<Subject | null> => {
     return null;
   }
   
-  if (data) {
-    return {
-      id: data.id,
-      name: data.name,
-      title: data.name,
-      icon: 'book-open',
-      color: getSubjectColor(data.id),
-      description: `${data.name} subject`,
-      progress: 0 // Default progress
-    };
-  }
-  
-  return null;
+  return data;
 };
 
 export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> => {
@@ -150,9 +106,10 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     .from('quizzes')
     .select(`
       id,
+      title,
       description,
-      duration,
-      quiz_code,
+      time_minutes,
+      question_count,
       subject_id
     `)
     .eq('subject_id', subjectId);
@@ -162,14 +119,7 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     return [];
   }
   
-  return (data || []).map(item => ({
-    id: item.id,
-    title: item.description || 'Untitled Quiz',
-    description: item.description || '',
-    subject_id: item.subject_id || 0,
-    time_minutes: item.duration || 0,
-    question_count: 0
-  }));
+  return data || [];
 };
 
 export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
@@ -184,14 +134,15 @@ export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
     return null;
   }
   
+  // Map the returned values to match our interface
   if (data) {
     return {
       id: data.id,
-      title: data.description || 'Untitled Quiz',
+      title: data.description || 'Untitled Quiz', // Use description field as title if available
       description: data.description || '',
       subject_id: data.subject_id || 0,
       time_minutes: data.duration || 0,
-      question_count: 0
+      question_count: 0, // We'll fetch the questions separately
     };
   }
   
@@ -209,6 +160,7 @@ export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> 
     return [];
   }
   
+  // Format the options and correct answer to match our interface
   return (data || []).map(item => ({
     id: item.id,
     quiz_id: item.quiz_id || 0,
@@ -231,8 +183,8 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   const { error } = await supabase
     .from('quiz_attempts')
     .insert({
-      "2211-0106": user.id,
-      "2": quizId,
+      "2211-0106": user.id, // Using the column name as it appears in the database
+      "2": quizId, // Using the column name as it appears in the database
       score: score,
       completed: new Date().toISOString(),
     });
@@ -249,7 +201,7 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> 
   const { data, error } = await supabase
     .from('flashcards')
     .select()
-    .eq('456', subjectId);
+    .eq('456', subjectId); // Using the column name as it appears in the database
   
   if (error) {
     console.error(`Error fetching flashcards for subject ${subjectId}:`, error);
@@ -258,7 +210,7 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> 
   
   return (data || []).map(item => ({
     question: item.question || '',
-    answer: item.elephant || ''
+    answer: item.elephant || '' // Using elephant field as the answer
   }));
 };
 
@@ -268,6 +220,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   if (!user) return [];
   
   try {
+    // Get recent quiz attempts but avoid complex joins that are failing
     const { data: quizAttempts, error: quizError } = await supabase
       .from('quiz_attempts')
       .select(`
@@ -285,6 +238,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
       return [];
     }
     
+    // Now separately fetch quiz info for each attempt
     const activities = [];
     
     if (quizAttempts && quizAttempts.length > 0) {
@@ -292,6 +246,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
         const quizId = attempt["2"];
         
         if (quizId) {
+          // Fetch the quiz info
           const { data: quizData } = await supabase
             .from('quizzes')
             .select(`
@@ -302,6 +257,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
             .eq('id', quizId)
             .single();
             
+          // If found the quiz, fetch subject info
           let subjectTitle = 'Unknown Subject';
           if (quizData && quizData.subject_id) {
             const { data: subjectData } = await supabase
@@ -370,17 +326,4 @@ export const updateQuizSettings = async (settings: Partial<Omit<QuizSettings, 'i
   }
   
   return true;
-};
-
-const getSubjectColor = (id: number): string => {
-  const colors = [
-    'bg-edu-purple',
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-amber-500',
-    'bg-red-500',
-    'bg-indigo-500'
-  ];
-  
-  return colors[(id - 1) % colors.length];
 };

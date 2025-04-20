@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 import QuizCard from './QuizCard';
 import SubjectCard from './SubjectCard';
 import RecentActivity from './RecentActivity';
@@ -10,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { getSubjects, getRecentActivities, Subject, getQuizzesBySubject, getFlashcardsBySubject } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
 
 interface ActivityType {
   type: 'quiz' | 'note' | 'practice';
@@ -23,29 +21,31 @@ interface ActivityType {
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [activities, setActivities] = useState<ActivityType[]>([]);
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [flashcards, setFlashcards] = useState<any[]>([]);
-
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: getSubjects
-  });
-
-  const { data: activities = [] } = useQuery({
-    queryKey: ['recentActivities'],
-    queryFn: () => getRecentActivities(5)
-  });
-
+  
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        if (subjects.length > 0) {
-          const mathSubject = subjects.find(s => s.title === 'Mathematics') || subjects[0];
+        // Fetch subjects
+        const subjectsData = await getSubjects();
+        setSubjects(subjectsData);
+        
+        // Fetch recent activities
+        const activitiesData = await getRecentActivities(5);
+        setActivities(activitiesData);
+        
+        // Fetch initial quizzes (from Mathematics subject or first available)
+        if (subjectsData.length > 0) {
+          const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
+          // Fetch flashcards
           const flashcardsData = await getFlashcardsBySubject(mathSubject.id);
           setFlashcards(flashcardsData.map(f => ({
             question: f.question,
@@ -64,16 +64,76 @@ const Dashboard = () => {
       }
     };
     
-    if (subjects.length > 0) {
+    if (user) {
       loadDashboardData();
     }
     
+    // Show sample data if not logged in or while loading
     if (!user || loading) {
-      setQuizzes([]);
+      setSubjects(fallbackSubjects);
+      setActivities(fallbackActivities);
       setFlashcards(fallbackFlashcards);
+      setQuizzes([]);
     }
-  }, [subjects, user, toast, loading]);
+  }, [user, toast]);
   
+  // Fallback data for when no subjects are loaded
+  const fallbackSubjects = [
+    {
+      id: 1,
+      title: "Mathematics",
+      icon: "circle-dot",
+      progress: 65,
+      color: "bg-edu-purple",
+    },
+    {
+      id: 2,
+      title: "Physics",
+      icon: "book-open",
+      progress: 42,
+      color: "bg-blue-500",
+    },
+    {
+      id: 3,
+      title: "Literature",
+      icon: "book-text",
+      progress: 78,
+      color: "bg-green-500",
+    },
+    {
+      id: 4,
+      title: "History",
+      icon: "graduation-cap",
+      progress: 30,
+      color: "bg-amber-500",
+    },
+  ];
+  
+  // Fallback activities
+  const fallbackActivities: ActivityType[] = [
+    {
+      type: 'quiz',
+      subject: 'Physics',
+      title: 'Motion and Forces Quiz',
+      timestamp: '2h ago',
+      score: 85,
+    },
+    {
+      type: 'note',
+      subject: 'Literature',
+      title: 'Essay Structure Notes',
+      timestamp: '1d ago',
+    },
+    {
+      type: 'practice',
+      subject: 'Mathematics',
+      title: 'Calculus Practice',
+      timestamp: '2d ago',
+      score: 92,
+    },
+  ];
+  
+  // Fallback flashcards
   const fallbackFlashcards = [
     {
       question: "What is the slope-intercept form of a linear equation?",
@@ -88,6 +148,11 @@ const Dashboard = () => {
       answer: "Ambition, power, fate, deception, and guilt",
     },
   ];
+  
+  const displayedSubjects = subjects.length > 0 ? subjects : fallbackSubjects;
+  const displayedActivities = activities.length > 0 ? activities : fallbackActivities;
+  const displayedFlashcards = flashcards.length > 0 ? flashcards : fallbackFlashcards;
+  const displayedQuizzes = quizzes.length > 0 ? quizzes : [];
   
   const handleSubjectClick = async (subjectId: number) => {
     try {
@@ -121,13 +186,13 @@ const Dashboard = () => {
       </h2>
 
       <section>
-        <h3 className="text-xl font-semibold font-poppins mb-4">Your Subjects</h3>
+        <h3 className="text-xl font-semibold mb-4 font-poppins">Your Subjects</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {subjects.map((subject, i) => (
+          {displayedSubjects.map((subject, i) => (
             <SubjectCard
               key={i}
-              title={subject.title || subject.name}
-              icon={getSubjectIcon(subject.title || subject.name)}
+              title={subject.title}
+              icon={getSubjectIcon(subject.title)}
               progress={subject.progress || 0}
               color={subject.color || "bg-edu-purple"}
               onClick={() => subject.id && handleSubjectClick(subject.id)}
@@ -145,9 +210,9 @@ const Dashboard = () => {
             </TabsList>
             <TabsContent value="quizzes" className="space-y-6">
               <h3 className="text-xl font-semibold font-poppins">Recommended Quizzes</h3>
-              {quizzes.length > 0 ? (
+              {displayedQuizzes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {quizzes.slice(0, 4).map((quiz) => (
+                  {displayedQuizzes.slice(0, 4).map((quiz) => (
                     <QuizCard
                       key={quiz.id}
                       id={quiz.id}
@@ -179,18 +244,19 @@ const Dashboard = () => {
             </TabsContent>
             <TabsContent value="flashcards">
               <h3 className="text-xl font-semibold mb-4 font-poppins">Study Flashcards</h3>
-              <FlashcardComponent cards={flashcards} />
+              <FlashcardComponent cards={displayedFlashcards} />
             </TabsContent>
           </Tabs>
         </div>
         <div>
-          <RecentActivity activities={activities} />
+          <RecentActivity activities={displayedActivities} />
         </div>
       </section>
     </div>
   );
 };
 
+// Helper function to get icons based on subject title
 const getSubjectIcon = (title: string) => {
   switch (title.toLowerCase()) {
     case 'mathematics':
