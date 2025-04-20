@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { getSubjects, getRecentActivities, Subject, getQuizzesBySubject, getFlashcardsBySubject } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 
 interface ActivityType {
   type: 'quiz' | 'note' | 'practice';
@@ -22,27 +23,27 @@ interface ActivityType {
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [activities, setActivities] = useState<ActivityType[]>([]);
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [flashcards, setFlashcards] = useState<any[]>([]);
-  
+
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: getSubjects
+  });
+
+  const { data: activities = [] } = useQuery({
+    queryKey: ['recentActivities'],
+    queryFn: () => getRecentActivities(5)
+  });
+
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // Fetch subjects
-        const subjectsData = await getSubjects();
-        setSubjects(subjectsData);
-        
-        // Fetch recent activities
-        const activitiesData = await getRecentActivities(5);
-        setActivities(activitiesData);
-        
         // Fetch initial quizzes (from Mathematics subject or first available)
-        if (subjectsData.length > 0) {
-          const mathSubject = subjectsData.find(s => s.title === 'Mathematics') || subjectsData[0];
+        if (subjects.length > 0) {
+          const mathSubject = subjects.find(s => s.title === 'Mathematics') || subjects[0];
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
@@ -65,78 +66,16 @@ const Dashboard = () => {
       }
     };
     
-    if (user) {
+    if (subjects.length > 0) {
       loadDashboardData();
     }
     
     // Show sample data if not logged in or while loading
     if (!user || loading) {
-      setSubjects([
-        {
-          id: 1,
-          name: "Mathematics",
-          title: "Mathematics",
-          icon: "circle-dot",
-          color: "bg-edu-purple",
-          description: "Mathematics subject",
-          progress: 65,
-        },
-        {
-          id: 2,
-          name: "Physics",
-          title: "Physics",
-          icon: "book-open",
-          color: "bg-blue-500",
-          description: "Physics subject",
-          progress: 42,
-        },
-        {
-          id: 3,
-          name: "Literature", 
-          title: "Literature",
-          icon: "book-text",
-          color: "bg-green-500",
-          description: "Literature subject",
-          progress: 78,
-        },
-        {
-          id: 4,
-          name: "History",
-          title: "History", 
-          icon: "graduation-cap",
-          color: "bg-amber-500",
-          description: "History subject",
-          progress: 30,
-        }
-      ] as Subject[]);
-      setActivities(fallbackActivities);
-      setFlashcards(fallbackFlashcards);
       setQuizzes([]);
+      setFlashcards(fallbackFlashcards);
     }
-  }, [user, toast]);
-  
-  const fallbackActivities: ActivityType[] = [
-    {
-      type: 'quiz',
-      subject: 'Physics',
-      title: 'Motion and Forces Quiz',
-      timestamp: '2h ago',
-      score: 85,
-    },
-    {
-      type: 'note',
-      subject: 'Literature',
-      title: 'Essay Structure Notes',
-      timestamp: '1d ago',
-    },
-    {
-      type: 'practice',
-      subject: 'Mathematics',
-      title: 'Calculus Practice',
-      timestamp: '2d ago',
-      score: 92,
-    },
-  ];
+  }, [subjects, user, toast, loading]);
   
   const fallbackFlashcards = [
     {
@@ -152,11 +91,6 @@ const Dashboard = () => {
       answer: "Ambition, power, fate, deception, and guilt",
     },
   ];
-  
-  const displayedSubjects = subjects.length > 0 ? subjects : [];
-  const displayedActivities = activities.length > 0 ? activities : fallbackActivities;
-  const displayedFlashcards = flashcards.length > 0 ? flashcards : fallbackFlashcards;
-  const displayedQuizzes = quizzes.length > 0 ? quizzes : [];
   
   const handleSubjectClick = async (subjectId: number) => {
     try {
@@ -184,11 +118,11 @@ const Dashboard = () => {
   };
 
   const handleExportSubjects = () => {
-    const exportData = displayedSubjects.map(subject => ({
+    const exportData = subjects.map(subject => ({
       Name: subject.name,
-      Title: subject.title,
+      Title: subject.title || subject.name,
       Progress: subject.progress || 0,
-      Description: subject.description
+      Description: subject.description || ''
     }));
     
     exportToCSV(exportData, 'subjects');
@@ -215,7 +149,7 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {displayedSubjects.map((subject, i) => (
+          {subjects.map((subject, i) => (
             <SubjectCard
               key={i}
               title={subject.title || subject.name}
@@ -237,9 +171,9 @@ const Dashboard = () => {
             </TabsList>
             <TabsContent value="quizzes" className="space-y-6">
               <h3 className="text-xl font-semibold font-poppins">Recommended Quizzes</h3>
-              {displayedQuizzes.length > 0 ? (
+              {quizzes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {displayedQuizzes.slice(0, 4).map((quiz) => (
+                  {quizzes.slice(0, 4).map((quiz) => (
                     <QuizCard
                       key={quiz.id}
                       id={quiz.id}
@@ -271,12 +205,12 @@ const Dashboard = () => {
             </TabsContent>
             <TabsContent value="flashcards">
               <h3 className="text-xl font-semibold mb-4 font-poppins">Study Flashcards</h3>
-              <FlashcardComponent cards={displayedFlashcards} />
+              <FlashcardComponent cards={flashcards} />
             </TabsContent>
           </Tabs>
         </div>
         <div>
-          <RecentActivity activities={displayedActivities} />
+          <RecentActivity activities={activities} />
         </div>
       </section>
     </div>

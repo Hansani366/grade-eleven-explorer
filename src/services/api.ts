@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -78,36 +77,45 @@ export const getProfile = async (): Promise<Profile | null> => {
 export const getSubjects = async (): Promise<Subject[]> => {
   const { data, error } = await supabase
     .from('subjects')
-    .select();
+    .select('*');
   
   if (error) {
     console.error('Error fetching subjects:', error);
     return [];
   }
   
-  // Map database fields to our interface with all required properties
-  return (data || []).map(subject => ({
-    id: subject.id,
-    name: subject.name,
-    title: subject.name, // Use name as title
-    icon: 'book-open', // Default icon
-    color: getSubjectColor(subject.id), // Generate color based on id
-    description: `${subject.name} subject`, // Default description
-    progress: 0 // Default progress
-  }));
+  return data;
 };
 
-const getSubjectColor = (id: number): string => {
-  const colors = [
-    'bg-edu-purple',
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-amber-500',
-    'bg-red-500',
-    'bg-indigo-500'
-  ];
+export const createSubject = async (subject: Omit<Subject, 'id'>): Promise<Subject | null> => {
+  const { data, error } = await supabase
+    .from('subjects')
+    .insert([subject])
+    .select()
+    .single();
   
-  return colors[(id - 1) % colors.length];
+  if (error) {
+    console.error('Error creating subject:', error);
+    return null;
+  }
+  
+  return data;
+};
+
+export const updateSubject = async (id: number, updates: Partial<Subject>): Promise<Subject | null> => {
+  const { data, error } = await supabase
+    .from('subjects')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating subject:', error);
+    return null;
+  }
+  
+  return data;
 };
 
 export const getSubjectById = async (id: number): Promise<Subject | null> => {
@@ -154,14 +162,13 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     return [];
   }
   
-  // Map database fields to our interface
   return (data || []).map(item => ({
     id: item.id,
-    title: item.description || 'Untitled Quiz', // Use description as title since there's no title field
+    title: item.description || 'Untitled Quiz',
     description: item.description || '',
     subject_id: item.subject_id || 0,
     time_minutes: item.duration || 0,
-    question_count: 0 // We'll fetch the questions count separately if needed
+    question_count: 0
   }));
 };
 
@@ -177,15 +184,14 @@ export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
     return null;
   }
   
-  // Map the returned values to match our interface
   if (data) {
     return {
       id: data.id,
-      title: data.description || 'Untitled Quiz', // Use description field as title if available
+      title: data.description || 'Untitled Quiz',
       description: data.description || '',
       subject_id: data.subject_id || 0,
       time_minutes: data.duration || 0,
-      question_count: 0, // We'll fetch the questions separately
+      question_count: 0
     };
   }
   
@@ -203,7 +209,6 @@ export const getQuizQuestions = async (quizId: number): Promise<QuizQuestion[]> 
     return [];
   }
   
-  // Format the options and correct answer to match our interface
   return (data || []).map(item => ({
     id: item.id,
     quiz_id: item.quiz_id || 0,
@@ -226,8 +231,8 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   const { error } = await supabase
     .from('quiz_attempts')
     .insert({
-      "2211-0106": user.id, // Using the column name as it appears in the database
-      "2": quizId, // Using the column name as it appears in the database
+      "2211-0106": user.id,
+      "2": quizId,
       score: score,
       completed: new Date().toISOString(),
     });
@@ -244,7 +249,7 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> 
   const { data, error } = await supabase
     .from('flashcards')
     .select()
-    .eq('456', subjectId); // Using the column name as it appears in the database
+    .eq('456', subjectId);
   
   if (error) {
     console.error(`Error fetching flashcards for subject ${subjectId}:`, error);
@@ -253,7 +258,7 @@ export const getFlashcardsBySubject = async (subjectId: number): Promise<any[]> 
   
   return (data || []).map(item => ({
     question: item.question || '',
-    answer: item.elephant || '' // Using elephant field as the answer
+    answer: item.elephant || ''
   }));
 };
 
@@ -263,7 +268,6 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
   if (!user) return [];
   
   try {
-    // Get recent quiz attempts but avoid complex joins that are failing
     const { data: quizAttempts, error: quizError } = await supabase
       .from('quiz_attempts')
       .select(`
@@ -281,7 +285,6 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
       return [];
     }
     
-    // Now separately fetch quiz info for each attempt
     const activities = [];
     
     if (quizAttempts && quizAttempts.length > 0) {
@@ -289,7 +292,6 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
         const quizId = attempt["2"];
         
         if (quizId) {
-          // Fetch the quiz info
           const { data: quizData } = await supabase
             .from('quizzes')
             .select(`
@@ -300,7 +302,6 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
             .eq('id', quizId)
             .single();
             
-          // If found the quiz, fetch subject info
           let subjectTitle = 'Unknown Subject';
           if (quizData && quizData.subject_id) {
             const { data: subjectData } = await supabase
@@ -369,4 +370,17 @@ export const updateQuizSettings = async (settings: Partial<Omit<QuizSettings, 'i
   }
   
   return true;
+};
+
+const getSubjectColor = (id: number): string => {
+  const colors = [
+    'bg-edu-purple',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-amber-500',
+    'bg-red-500',
+    'bg-indigo-500'
+  ];
+  
+  return colors[(id - 1) % colors.length];
 };
