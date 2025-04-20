@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -111,17 +112,6 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleExportSubjects = () => {
-    const exportData = subjects.map(subject => ({
-      Name: subject.name,
-      Title: subject.title || subject.name,
-      Progress: subject.progress || 0,
-      Description: subject.description || ''
-    }));
-    
-    exportToCSV(exportData, 'subjects');
   };
 
   return (
