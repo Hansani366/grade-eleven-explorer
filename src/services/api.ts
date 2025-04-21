@@ -14,6 +14,8 @@ export interface Subject {
   icon: string;
   color: string;
   description: string;
+  progress: number;  // Add the progress property to match the database schema
+  name?: string;     // Make name optional as some code might reference it
 }
 
 export interface Quiz {
