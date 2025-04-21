@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [activeSubject, setActiveSubject] = useState<number | null>(null);
   
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -42,6 +43,7 @@ const Dashboard = () => {
         // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjectsData.length > 0) {
           const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
+          setActiveSubject(mathSubject.id);
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
@@ -157,6 +159,7 @@ const Dashboard = () => {
   const handleSubjectClick = async (subjectId: number) => {
     try {
       setLoading(true);
+      setActiveSubject(subjectId);
       const [newQuizzes, newFlashcards] = await Promise.all([
         getQuizzesBySubject(subjectId),
         getFlashcardsBySubject(subjectId)
@@ -180,13 +183,24 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6 space-y-8">
-      <h2 className="text-2xl font-bold font-poppins mb-6">
-        {user ? `Welcome Back, ${user.user_metadata?.full_name || 'Student'}!` : 'Welcome Back, Student!'}
-      </h2>
+    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h2 className="text-3xl font-bold font-poppins bg-gradient-to-r from-edu-purple to-blue-500 bg-clip-text text-transparent">
+          {user ? `Welcome Back, ${user.user_metadata?.full_name || 'Student'}!` : 'Welcome Back, Student!'}
+        </h2>
+        
+        <div className="hidden sm:block">
+          <div className="bg-edu-gray/50 px-4 py-2 rounded-full text-sm font-medium text-gray-600">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+        </div>
+      </div>
 
-      <section>
-        <h3 className="text-xl font-semibold mb-4 font-poppins">Your Subjects</h3>
+      <section className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 className="text-xl font-semibold mb-5 font-poppins flex items-center">
+          <span className="w-1.5 h-5 bg-edu-purple rounded-full mr-2"></span>
+          Your Subjects
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {displayedSubjects.map((subject, i) => (
             <SubjectCard
@@ -196,20 +210,33 @@ const Dashboard = () => {
               progress={subject.progress || 0}
               color={subject.color || "bg-edu-purple"}
               onClick={() => subject.id && handleSubjectClick(subject.id)}
+              isActive={subject.id === activeSubject}
             />
           ))}
         </div>
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="quizzes">
-            <TabsList className="mb-4">
-              <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
-              <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <Tabs defaultValue="quizzes" className="w-full">
+            <TabsList className="mb-6 grid w-full grid-cols-2 bg-edu-gray/30 p-1 rounded-lg">
+              <TabsTrigger value="quizzes" className="rounded-md data-[state=active]:bg-white data-[state=active]:text-edu-purple data-[state=active]:shadow-sm">
+                Quizzes
+              </TabsTrigger>
+              <TabsTrigger value="flashcards" className="rounded-md data-[state=active]:bg-white data-[state=active]:text-edu-purple data-[state=active]:shadow-sm">
+                Flashcards
+              </TabsTrigger>
             </TabsList>
-            <TabsContent value="quizzes" className="space-y-6">
-              <h3 className="text-xl font-semibold font-poppins">Recommended Quizzes</h3>
+            <TabsContent value="quizzes" className="space-y-6 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold font-poppins flex items-center">
+                  <span className="w-1.5 h-5 bg-blue-500 rounded-full mr-2"></span>
+                  Recommended Quizzes
+                </h3>
+                {loading && (
+                  <div className="text-sm text-gray-500 animate-pulse">Loading...</div>
+                )}
+              </div>
               {displayedQuizzes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {displayedQuizzes.slice(0, 4).map((quiz) => (
@@ -242,13 +269,22 @@ const Dashboard = () => {
                 </div>
               )}
             </TabsContent>
-            <TabsContent value="flashcards">
-              <h3 className="text-xl font-semibold mb-4 font-poppins">Study Flashcards</h3>
+            <TabsContent value="flashcards" className="animate-fade-in">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-xl font-semibold font-poppins flex items-center">
+                  <span className="w-1.5 h-5 bg-green-500 rounded-full mr-2"></span>
+                  Study Flashcards
+                </h3>
+                {loading && (
+                  <div className="text-sm text-gray-500 animate-pulse">Loading...</div>
+                )}
+              </div>
               <FlashcardComponent cards={displayedFlashcards} />
             </TabsContent>
           </Tabs>
         </div>
-        <div>
+        
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <RecentActivity activities={displayedActivities} />
         </div>
       </section>
