@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import QuizCard from './QuizCard';
@@ -32,22 +31,18 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // Fetch subjects
         const subjectsData = await getSubjects();
         setSubjects(subjectsData);
         
-        // Fetch recent activities
         const activitiesData = await getRecentActivities(5);
         setActivities(activitiesData);
         
-        // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjectsData.length > 0) {
           const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
           setActiveSubject(mathSubject.id);
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
           
-          // Fetch flashcards
           const flashcardsData = await getFlashcardsBySubject(mathSubject.id);
           setFlashcards(flashcardsData.map(f => ({
             question: f.question,
@@ -70,7 +65,6 @@ const Dashboard = () => {
       loadDashboardData();
     }
     
-    // Show sample data if not logged in or while loading
     if (!user || loading) {
       setSubjects(fallbackSubjects);
       setActivities(fallbackActivities);
@@ -79,14 +73,15 @@ const Dashboard = () => {
     }
   }, [user, toast]);
   
-  // Fallback data for when no subjects are loaded
-  const fallbackSubjects = [
+  const fallbackSubjects: Subject[] = [
     {
       id: 1,
       title: "Mathematics",
       icon: "circle-dot",
       progress: 65,
       color: "bg-edu-purple",
+      description: "Math stuff",
+      name: "Mathematics",
     },
     {
       id: 2,
@@ -94,6 +89,8 @@ const Dashboard = () => {
       icon: "book-open",
       progress: 42,
       color: "bg-blue-500",
+      description: "Physics stuff",
+      name: "Physics",
     },
     {
       id: 3,
@@ -101,6 +98,8 @@ const Dashboard = () => {
       icon: "book-text",
       progress: 78,
       color: "bg-green-500",
+      description: "Literature stuff",
+      name: "Literature",
     },
     {
       id: 4,
@@ -108,10 +107,11 @@ const Dashboard = () => {
       icon: "graduation-cap",
       progress: 30,
       color: "bg-amber-500",
+      description: "History stuff",
+      name: "History",
     },
   ];
   
-  // Fallback activities
   const fallbackActivities: ActivityType[] = [
     {
       type: 'quiz',
@@ -135,7 +135,6 @@ const Dashboard = () => {
     },
   ];
   
-  // Fallback flashcards
   const fallbackFlashcards = [
     {
       question: "What is the slope-intercept form of a linear equation?",
@@ -202,15 +201,14 @@ const Dashboard = () => {
           Your Subjects
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {displayedSubjects.map((subject, i) => (
+          {displayedSubjects.map((subject) => (
             <SubjectCard
-              key={i}
-              title={subject.title}
-              icon={getSubjectIcon(subject.title)}
+              key={subject.id}
+              title={subject.title || subject.name}
+              icon={getSubjectIcon(subject.title || subject.name)}
               progress={subject.progress || 0}
               color={subject.color || "bg-edu-purple"}
               onClick={() => subject.id && handleSubjectClick(subject.id)}
-              isActive={subject.id === activeSubject}
             />
           ))}
         </div>
@@ -288,11 +286,16 @@ const Dashboard = () => {
           <RecentActivity activities={displayedActivities} />
         </div>
       </section>
+
+      <section className="mt-10">
+        <div className="text-center text-gray-400 italic">
+          (Calendar feature coming soon: recurring events, reminders, and custom date formats)
+        </div>
+      </section>
     </div>
   );
 };
 
-// Helper function to get icons based on subject title
 const getSubjectIcon = (title: string) => {
   switch (title.toLowerCase()) {
     case 'mathematics':

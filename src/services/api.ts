@@ -193,20 +193,26 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     .from('quizzes')
     .select(`
       id,
-      title,
       description,
-      time_minutes,
-      question_count,
-      subject_id
+      subject_id,
+      duration
     `)
     .eq('subject_id', subjectId);
-  
+
   if (error) {
     console.error(`Error fetching quizzes for subject ${subjectId}:`, error);
     return [];
   }
-  
-  return data || [];
+
+  // Fix: Map properties so Quiz interface is satisfied (title should be description)
+  return (data || []).map((q: any) => ({
+    id: q.id,
+    title: q.description, // description is used for title here
+    subject_id: q.subject_id,
+    description: q.description,
+    time_minutes: q.duration,
+    question_count: 0, // Placeholder, update if/when question count available
+  }));
 };
 
 export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
