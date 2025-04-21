@@ -2,8 +2,15 @@
 import React from 'react';
 import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
   return (
     <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
       <div className="flex items-center">
@@ -13,7 +20,12 @@ const Header = () => {
         <Button variant="ghost" size="icon" className="text-gray-600">
           <Bell className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-gray-600">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-gray-600" 
+          onClick={handleProfileClick}
+        >
           <User className="h-5 w-5" />
         </Button>
       </div>
