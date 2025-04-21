@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BookOpen, BookText, CircleDot, GraduationCap } from 'lucide-react';
 import QuizCard from './QuizCard';
@@ -41,7 +42,7 @@ const Dashboard = () => {
         
         // Fetch initial quizzes (from Mathematics subject or first available)
         if (subjectsData.length > 0) {
-          const mathSubject = subjectsData.find(s => s.title === 'Mathematics') || subjectsData[0];
+          const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
           setActiveSubject(mathSubject.id);
           const quizzesData = await getQuizzesBySubject(mathSubject.id);
           setQuizzes(quizzesData);
@@ -71,51 +72,44 @@ const Dashboard = () => {
     
     // Show sample data if not logged in or while loading
     if (!user || loading) {
-      // Define fallback subjects with all required properties
-      const fallbackSubjectsData: Subject[] = [
-        {
-          id: 1,
-          title: "Mathematics",
-          icon: "circle-dot",
-          progress: 65,
-          color: "bg-edu-purple",
-          description: "Learn mathematics fundamentals",
-          subject_id: 1
-        },
-        {
-          id: 2,
-          title: "Physics",
-          icon: "book-open",
-          progress: 42,
-          color: "bg-blue-500",
-          description: "Explore physics concepts",
-          subject_id: 2
-        },
-        {
-          id: 3,
-          title: "Literature",
-          icon: "book-text",
-          progress: 78,
-          color: "bg-green-500",
-          description: "Study classic and modern literature",
-          subject_id: 3
-        },
-        {
-          id: 4,
-          title: "History",
-          icon: "graduation-cap",
-          progress: 30,
-          color: "bg-amber-500",
-          description: "Discover world history",
-          subject_id: 4
-        },
-      ];
-      setSubjects(fallbackSubjectsData);
+      setSubjects(fallbackSubjects);
       setActivities(fallbackActivities);
       setFlashcards(fallbackFlashcards);
       setQuizzes([]);
     }
   }, [user, toast]);
+  
+  // Fallback data for when no subjects are loaded
+  const fallbackSubjects = [
+    {
+      id: 1,
+      title: "Mathematics",
+      icon: "circle-dot",
+      progress: 65,
+      color: "bg-edu-purple",
+    },
+    {
+      id: 2,
+      title: "Physics",
+      icon: "book-open",
+      progress: 42,
+      color: "bg-blue-500",
+    },
+    {
+      id: 3,
+      title: "Literature",
+      icon: "book-text",
+      progress: 78,
+      color: "bg-green-500",
+    },
+    {
+      id: 4,
+      title: "History",
+      icon: "graduation-cap",
+      progress: 30,
+      color: "bg-amber-500",
+    },
+  ];
   
   // Fallback activities
   const fallbackActivities: ActivityType[] = [
@@ -157,7 +151,7 @@ const Dashboard = () => {
     },
   ];
   
-  const displayedSubjects = subjects.length > 0 ? subjects : [];
+  const displayedSubjects = subjects.length > 0 ? subjects : fallbackSubjects;
   const displayedActivities = activities.length > 0 ? activities : fallbackActivities;
   const displayedFlashcards = flashcards.length > 0 ? flashcards : fallbackFlashcards;
   const displayedQuizzes = quizzes.length > 0 ? quizzes : [];

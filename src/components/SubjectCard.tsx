@@ -9,13 +9,12 @@ interface SubjectCardProps {
   progress: number;
   color: string;
   onClick: () => void;
-  isActive?: boolean;
 }
 
-const SubjectCard = ({ title, icon, progress, color, onClick, isActive = false }: SubjectCardProps) => {
+const SubjectCard = ({ title, icon, progress, color, onClick }: SubjectCardProps) => {
   return (
     <Card 
-      className={`transition-transform hover:scale-105 cursor-pointer animate-fade-in ${isActive ? 'ring-2 ring-edu-purple ring-offset-2' : ''}`}
+      className="transition-transform hover:scale-105 cursor-pointer animate-fade-in" 
       onClick={onClick}
     >
       <CardContent className="p-6 flex flex-col items-center">
