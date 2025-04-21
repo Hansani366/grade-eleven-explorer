@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -106,10 +105,9 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     .from('quizzes')
     .select(`
       id,
-      title,
       description,
-      time_minutes,
-      question_count,
+      duration,
+      quiz_code,
       subject_id
     `)
     .eq('subject_id', subjectId);
@@ -119,7 +117,15 @@ export const getQuizzesBySubject = async (subjectId: number): Promise<Quiz[]> =>
     return [];
   }
   
-  return data || [];
+  // Map the returned values to match our Quiz interface
+  return (data || []).map(item => ({
+    id: item.id,
+    title: item.description || 'Untitled Quiz', // Use description as title
+    description: item.description || '',
+    subject_id: item.subject_id || 0,
+    time_minutes: item.duration || 0,
+    question_count: 0 // We'll need to fetch the questions separately to get this count
+  }));
 };
 
 export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
@@ -138,7 +144,7 @@ export const getQuizById = async (quizId: number): Promise<Quiz | null> => {
   if (data) {
     return {
       id: data.id,
-      title: data.description || 'Untitled Quiz', // Use description field as title if available
+      title: data.description || 'Untitled Quiz', // Use description field as title
       description: data.description || '',
       subject_id: data.subject_id || 0,
       time_minutes: data.duration || 0,
