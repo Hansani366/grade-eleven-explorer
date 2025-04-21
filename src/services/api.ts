@@ -11,9 +11,11 @@ export interface Profile {
 export interface Subject {
   id: number;
   title: string;
+  name: string;
   icon: string;
   color: string;
   description: string;
+  progress: number;
 }
 
 export interface Quiz {
