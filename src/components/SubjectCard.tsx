@@ -9,9 +9,10 @@ interface SubjectCardProps {
   progress: number;
   color: string;
   onClick: () => void;
+  id?: number; // Make id optional to avoid breaking existing code
 }
 
-const SubjectCard = ({ title, icon, progress, color, onClick }: SubjectCardProps) => {
+const SubjectCard = ({ title, icon, progress, color, onClick, id }: SubjectCardProps) => {
   return (
     <Card 
       className="transition-transform hover:scale-105 cursor-pointer animate-fade-in" 
