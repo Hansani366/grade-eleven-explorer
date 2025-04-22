@@ -1,3 +1,4 @@
+
 # **System Administration & Maintenance Report for Grade Eleven Explorer**
 
 ## 1. Overview  
@@ -56,6 +57,30 @@ Future improvements include:
 - Implementing a more detailed **Monitoring Dashboard** to visualize system performance, user activity, and errors in real-time.  
 - Integrating advanced **backup strategies** for more granular data recovery (e.g., weekly snapshot, versioning).  
 - Expanding **mobile support** for the platform.
+
+---
+
+## 9. User Personas & Journey Map
+
+### 👩‍🎓 Persona 1: Ayesha  
+- **Age**: 25 
+- **Profile**: Final-year CS student  
+- **Goal**: Improve focus and avoid distractions  
+- **Pain Points**: Struggles with time management, needs structure for studying  
+
+### 👨‍🎓 Persona 2: Nuwan  
+- **Age**: 21 
+- **Profile**: A/L student preparing for exams  
+- **Goal**: Study effectively with breaks  
+- **Pain Points**: Easily procrastinates, overwhelmed by long study hours  
+
+### 🗺️ User Journey (Example: Ayesha)  
+| Step                    | Ayesha's Action           | System Feature               | Experience        |
+|-------------------------|---------------------------|------------------------------|-------------------|
+| 1. Visits the platform  | Opens Grade Eleven Explorer | Landing Page with sign-up    | Curious & interested |
+| 2. Starts study timer   | Clicks 'Start Pomodoro'   | Timer begins countdown       | Focused           |
+| 3. Takes a quiz         | Opens quiz module         | Pulls questions from Supabase| Engaged           |
+| 4. Reviews performance  | Views dashboard           | Graphs show quiz progress    | Motivated         |
 
 ---
 
