@@ -61,30 +61,30 @@ export type Database = {
       }
       quiz_attempts: {
         Row: {
-          "2": number | null
-          "2211-0106": string | null
           completed: string
           id: number
+          quiz_id: number | null
           score: number
+          user_id: string | null
         }
         Insert: {
-          "2"?: number | null
-          "2211-0106"?: string | null
           completed?: string
           id?: number
+          quiz_id?: number | null
           score: number
+          user_id?: string | null
         }
         Update: {
-          "2"?: number | null
-          "2211-0106"?: string | null
           completed?: string
           id?: number
+          quiz_id?: number | null
           score?: number
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "quiz_attempts_2_fkey"
-            columns: ["2"]
+            columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
             referencedColumns: ["id"]
@@ -198,18 +198,21 @@ export type Database = {
           description: string
           id: number
           name: string
+          title: string | null
         }
         Insert: {
           category?: string
           description?: string
           id?: number
           name: string
+          title?: string | null
         }
         Update: {
           category?: string
           description?: string
           id?: number
           name?: string
+          title?: string | null
         }
         Relationships: []
       }

@@ -21,23 +21,23 @@ export const useSubjectProgress = (subjectId: number) => {
       const quizIds = quizzes.map(quiz => quiz.id);
 
       // Get user's completed quiz attempts for this subject
-      const { data: attempts } = await supabase
+      const { data: attempts, error } = await supabase
         .from('quiz_attempts')
         .select('score, quiz_id')
-        .in('2', quizIds);
+        .in('quiz_id', quizIds);
 
-      if (!attempts || attempts.length === 0) {
+      if (error || !attempts || attempts.length === 0) {
         setProgress(0);
         return;
       }
 
       // Calculate average score from completed quizzes
-      const totalScore = attempts.reduce((sum, attempt) => sum + attempt.score, 0);
-      const averageScore = Math.round((totalScore / attempts.length));
+      const averageScore = Math.round(
+        attempts.reduce((sum, attempt) => sum + attempt.score, 0) / attempts.length
+      );
       
-      // Convert score to percentage (assuming max score is 100)
+      // Convert score to percentage (0-100)
       const progressPercentage = Math.min(Math.max(averageScore, 0), 100);
-      
       setProgress(progressPercentage);
     };
 
