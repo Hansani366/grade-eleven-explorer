@@ -66,7 +66,7 @@ npm run dev
 - [`adr.md`](./adr.md) – Architecture Decisions
 - [`runbook.md`](./runbook.md) – Operations Runbook
 - [`architecture.md`](./architecture.md) – System Diagram + Components
-- [`grade11_explorer_report.md`](./grade11_explorer_report.md) – Final System Admin Report
+- [`grade11_explorer_report.md`](./system-admin-report.md) – Final System Admin Report
 
 ---
 
