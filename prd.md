@@ -1,35 +1,70 @@
 # Product Requirements Document (PRD)
 
-## 1. Overview
+## 1. Overview  
 **Product Name**: Grade Eleven Explorer  
 **Purpose**:  
-An educational micro SaaS platform designed to help Grade 11 students navigate school subjects, resources, and interactive learning experiences with real-time support and feedback.
+An educational micro SaaS platform designed to help Grade 11 students explore subjects through curated notes, interactive quizzes, and digital resources. Powered by Supabase for real-time data, authentication, and storage.
 
-## 2. Target Users
-- Grade 11 students
-- Educators looking for supplementary material
-- Parents monitoring student progress
+---
 
-## 3. Core Features
-- Subject-specific modules (e.g., Math, Science)
-- Interactive quizzes with real-time feedback
-- Resource repository (PDFs, videos, notes)
-- Supabase-powered user authentication and data storage
+## 2. Target Users  
+- Grade 11 students seeking self-study tools  
+- Educators looking for structured content delivery  
+- Parents/guardians tracking academic engagement  
 
-## 4. Success Metrics
-- Increased weekly active users
-- Quiz completion and accuracy rates
-- Number of resources accessed/downloaded
-- Progress tracking engagement
+---
 
-## 5. Scope & Limitations
-- Initial version supports a few core subjects (Math, Science)
-- Only Grade 11 curriculum targeted for MVP
-- Limited to web platform (mobile support in future)
+## 3. Core Features  
 
-## 6. Timeline
+### 🧠 Subject Explorer  
+- Browse categorized subjects (e.g., Maths, Science, Commerce)  
+- View individual lesson notes (titles + content stored in Supabase)  
+
+### 📝 Notes System (Supabase-Powered)  
+- Dynamically loaded notes from Supabase tables  
+- Each note contains a **title** and **content**  
+- Editable content module (admin only)
+
+### 🎯 Interactive Quizzes  
+- Subject-wise quizzes with instant feedback  
+- Score tracking and correct/incorrect indicators  
+
+### 💂️ Resource Library  
+- PDF file viewer and download support  
+- Multimedia lessons: YouTube embeds, infographics  
+
+### 🔐 Authentication (Supabase Auth)  
+- Sign up/login via email  
+- Protected access to notes and quiz results  
+
+### 📊 Dashboard (Coming Soon or In Dev)  
+- Student progress overview (planned module)  
+- Quiz history, recent activity  
+
+---
+
+## 4. Success Metrics  
+- % increase in user signups and return visits  
+- Avg. quiz accuracy improvement over time  
+- Number of downloads/views per subject note  
+- User engagement time per session  
+
+---
+
+## 5. Scope & Limitations  
+- Current focus: Grade 11 Science and Commerce streams  
+- No mobile app yet (responsive web only)  
+- Basic styling/theme; planned upgrades for UI/UX polish  
+
+---
+
+## 6. Timeline  
 | Milestone               | Date         |
 |-------------------------|--------------|
 | MVP Launch              | 2025-04-10   |
 | Feedback & Testing      | 2025-04-19   |
-| Final Release           | 2025-04-22   |
+| Final Release           | 2025-04-24   |
+| Notes Module Live       | 2025-04-22   |
+| Quiz System Upgrade     | 2025-04-20   |
+| Dashboard (Planned)     | 2025-04-23   |
+
