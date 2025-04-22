@@ -84,8 +84,8 @@ export const submitQuizAttempt = async (quizId: number, score: number): Promise<
   const { error } = await supabase
     .from('quiz_attempts')
     .insert({
-      "2211-0106": user.id,
-      "2": quizId,
+      user_id: user.id,
+      quiz_id: quizId,
       score: score,
       completed: new Date().toISOString(),
     });
@@ -108,9 +108,9 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
         id,
         score,
         completed,
-        2
+        quiz_id
       `)
-      .eq('2211-0106', user.id)
+      .eq('user_id', user.id)
       .order('completed', { ascending: false })
       .limit(limit);
 
@@ -123,8 +123,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
 
     if (quizAttempts && quizAttempts.length > 0) {
       for (const attempt of quizAttempts) {
-        const quizId = attempt["2"];
-        if (quizId) {
+        if (attempt.quiz_id) {
           const { data: quizData } = await supabase
             .from('quizzes')
             .select(`
@@ -132,7 +131,7 @@ export const getRecentActivities = async (limit: number = 5): Promise<any[]> => 
               description,
               subject_id
             `)
-            .eq('id', quizId)
+            .eq('id', attempt.quiz_id)
             .single();
 
           let subjectTitle = 'Unknown Subject';
