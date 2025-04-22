@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Quiz from "./pages/Quiz";
-import ProfilePage from "./pages/ProfilePage"; // Import the new ProfilePage
+import ProfilePage from "./pages/ProfilePage";
+import SubjectDetails from "./pages/SubjectDetails";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +52,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Quiz />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/subject/:subjectId" 
+              element={
+                <ProtectedRoute>
+                  <SubjectDetails />
                 </ProtectedRoute>
               } 
             />

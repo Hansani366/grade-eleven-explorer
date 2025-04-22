@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { CircleProgress } from './CircleProgress';
 import { useSubjectProgress } from '@/hooks/useSubjectProgress';
+import { useNavigate } from 'react-router-dom';
 
 interface SubjectCardProps {
   title: string;
@@ -12,13 +13,18 @@ interface SubjectCardProps {
   id: number;
 }
 
-const SubjectCard = ({ title, icon, color, onClick, id }: SubjectCardProps) => {
+const SubjectCard = ({ title, icon, color, id }: SubjectCardProps) => {
   const progress = useSubjectProgress(id);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/subject/${id}`);
+  };
 
   return (
     <Card 
       className="transition-transform hover:scale-105 cursor-pointer animate-fade-in" 
-      onClick={onClick}
+      onClick={handleClick}
     >
       <CardContent className="p-6 flex flex-col items-center">
         <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white mb-4 ${color}`}>
