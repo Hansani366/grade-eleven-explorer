@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   open: boolean;
@@ -23,14 +24,25 @@ interface FormData {
 const CreateNoteDialog = ({ open, onOpenChange, subjectId }: Props) => {
   const form = useForm<FormData>();
   const { toast } = useToast();
+  const { user } = useAuth(); // Get the current user from auth context
 
   const onSubmit = async (data: FormData) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create notes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from('subject_notes')
       .insert({
         subject_id: subjectId,
         title: data.title,
         content: data.content,
+        user_id: user.id, // Add the user_id field
       });
 
     if (error) {
@@ -39,6 +51,7 @@ const CreateNoteDialog = ({ open, onOpenChange, subjectId }: Props) => {
         description: "Failed to create note. Please try again.",
         variant: "destructive",
       });
+      console.error("Error creating note:", error);
       return;
     }
 

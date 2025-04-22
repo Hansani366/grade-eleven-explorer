@@ -9,8 +9,16 @@ import CreateNoteDialog from '@/components/subject/CreateNoteDialog';
 
 const SubjectDetails = () => {
   const { subjectId } = useParams();
-  const { notes, isLoading } = useSubjectNotes(Number(subjectId));
+  const { notes, isLoading, refetchNotes } = useSubjectNotes(Number(subjectId));
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
+
+  const handleDialogChange = (open: boolean) => {
+    setShowCreateDialog(open);
+    if (!open) {
+      // Refresh notes list when dialog is closed
+      refetchNotes();
+    }
+  };
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -30,7 +38,7 @@ const SubjectDetails = () => {
       
       <CreateNoteDialog 
         open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+        onOpenChange={handleDialogChange}
         subjectId={Number(subjectId)}
       />
     </div>

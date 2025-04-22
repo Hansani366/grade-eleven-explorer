@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface Note {
@@ -13,25 +13,27 @@ export const useSubjectNotes = (subjectId: number) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const { data, error } = await supabase
-        .from('subject_notes')
-        .select('*')
-        .eq('subject_id', subjectId)
-        .order('created_at', { ascending: false });
+  const fetchNotes = useCallback(async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('subject_notes')
+      .select('*')
+      .eq('subject_id', subjectId)
+      .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching notes:', error);
-        return;
-      }
-
-      setNotes(data || []);
+    if (error) {
+      console.error('Error fetching notes:', error);
       setIsLoading(false);
-    };
+      return;
+    }
 
-    fetchNotes();
+    setNotes(data || []);
+    setIsLoading(false);
   }, [subjectId]);
 
-  return { notes, isLoading };
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
+
+  return { notes, isLoading, refetchNotes: fetchNotes };
 };
