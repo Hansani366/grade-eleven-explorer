@@ -194,31 +194,22 @@ export type Database = {
       }
       subjects: {
         Row: {
-          color: string
+          category: string
           description: string
-          icon: string
           id: number
           name: string
-          progress: number
-          title: string | null
         }
         Insert: {
-          color?: string
+          category?: string
           description?: string
-          icon?: string
           id?: number
           name: string
-          progress?: number
-          title?: string | null
         }
         Update: {
-          color?: string
+          category?: string
           description?: string
-          icon?: string
           id?: number
           name?: string
-          progress?: number
-          title?: string | null
         }
         Relationships: []
       }

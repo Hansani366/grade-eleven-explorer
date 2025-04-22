@@ -2,17 +2,19 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { CircleProgress } from './CircleProgress';
+import { useSubjectProgress } from '@/hooks/useSubjectProgress';
 
 interface SubjectCardProps {
   title: string;
   icon: React.ReactNode;
-  progress: number;
   color: string;
   onClick: () => void;
-  id?: number; // Make id optional to avoid breaking existing code
+  id: number;
 }
 
-const SubjectCard = ({ title, icon, progress, color, onClick, id }: SubjectCardProps) => {
+const SubjectCard = ({ title, icon, color, onClick, id }: SubjectCardProps) => {
+  const progress = useSubjectProgress(id);
+
   return (
     <Card 
       className="transition-transform hover:scale-105 cursor-pointer animate-fade-in" 
