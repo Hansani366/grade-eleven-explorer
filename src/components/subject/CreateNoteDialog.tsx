@@ -39,10 +39,10 @@ const CreateNoteDialog = ({ open, onOpenChange, subjectId }: Props) => {
     const { error } = await supabase
       .from('subject_notes')
       .insert({
+        Title: data.title,
+        Content: data.content,
         subject_id: subjectId,
-        title: data.title,
-        content: data.content,
-        user_id: user.id, // Add the user_id field
+        user_id: user.id
       });
 
     if (error) {

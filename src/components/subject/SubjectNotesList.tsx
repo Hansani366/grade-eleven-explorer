@@ -1,13 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-}
+import { Note } from '@/hooks/useSubjectNotes';
 
 interface Props {
   notes: Note[];
@@ -27,10 +21,10 @@ const SubjectNotesList = ({ notes }: Props) => {
       {notes.map((note) => (
         <Card key={note.id}>
           <CardHeader>
-            <CardTitle>{note.title}</CardTitle>
+            <CardTitle>{note.Title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap">{note.content}</p>
+            <p className="whitespace-pre-wrap">{note.Content}</p>
           </CardContent>
         </Card>
       ))}

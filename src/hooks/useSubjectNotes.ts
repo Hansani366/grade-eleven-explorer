@@ -2,11 +2,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
-interface Note {
+export interface Note {
   id: string;
-  title: string;
-  content: string;
-  created_at: string;
+  Title: string;
+  Content: string;
+  created_at?: string;
+  subject_id?: number;
+  user_id?: string;
 }
 
 export const useSubjectNotes = (subjectId: number) => {
