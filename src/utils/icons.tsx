@@ -13,10 +13,15 @@ import {
 } from 'lucide-react';
 
 export const getSubjectIcon = (title: string) => {
+  // Create a case-insensitive mapping to handle various inputs
+  const titleLower = title ? title.toLowerCase() : '';
+  
   const subjectMap: { [key: string]: React.ReactNode } = {
     'mathematics': <Calculator className="h-7 w-7" />,
+    'math': <Calculator className="h-7 w-7" />,
     'physics': <Atom className="h-7 w-7" />,
     'literature': <Scroll className="h-7 w-7" />,
+    'english': <BookText className="h-7 w-7" />,
     'history': <Globe className="h-7 w-7" />,
     'computer science': <BookOpen className="h-7 w-7" />,
     'chemistry': <CircleDot className="h-7 w-7" />,
@@ -24,8 +29,8 @@ export const getSubjectIcon = (title: string) => {
     'default': <GraduationCap className="h-7 w-7" />
   };
 
-  // Convert title to lowercase and find the matching icon, fallback to default
-  return subjectMap[title.toLowerCase()] || subjectMap['default'];
+  // Return the matching icon or default if no match
+  return subjectMap[titleLower] || subjectMap['default'];
 };
 
 // Optional: Export individual icons for direct use if needed

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { CircleProgress } from './CircleProgress';
 import { useSubjectProgress } from '@/hooks/useSubjectProgress';
@@ -14,12 +14,15 @@ interface SubjectCardProps {
   id: number;
 }
 
-const SubjectCard = ({ title, icon, color, id }: SubjectCardProps) => {
+// Use memo to prevent unnecessary re-renders
+const SubjectCard = memo(({ title, icon, color, id }: SubjectCardProps) => {
   const progress = useSubjectProgress(id);
   const navigate = useNavigate();
   
-  // Ensure we always have an icon by using getSubjectIcon as fallback
-  const displayIcon = icon || getSubjectIcon(title);
+  // Store a stable reference to the icon
+  const displayIcon = React.useMemo(() => {
+    return icon || getSubjectIcon(title);
+  }, [icon, title]);
 
   const handleClick = () => {
     navigate(`/subject/${id}`);
@@ -39,6 +42,9 @@ const SubjectCard = ({ title, icon, color, id }: SubjectCardProps) => {
       </CardContent>
     </Card>
   );
-};
+});
+
+// Add display name for better debugging
+SubjectCard.displayName = "SubjectCard";
 
 export default SubjectCard;
