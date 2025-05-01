@@ -1,11 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getSubjects, getRecentActivities, Subject, getQuizzesBySubject, getFlashcardsBySubject } from '@/services/api';
+import { getSubjects, getRecentActivities, Subject } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
-import DashboardHeader from './dashboard/DashboardHeader';
-import SubjectsSection from './dashboard/SubjectsSection';
-import ContentTabs from './dashboard/ContentTabs';
-import RecentActivity from './RecentActivity';
+import { useSubjectContent } from './dashboard/SubjectContentLoader';
+import DashboardLayout from './dashboard/DashboardLayout';
 
 interface ActivityType {
   type: 'quiz' | 'note' | 'practice';
@@ -20,10 +19,14 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [activities, setActivities] = useState<ActivityType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [quizzes, setQuizzes] = useState<any[]>([]);
-  const [flashcards, setFlashcards] = useState<any[]>([]);
-  const [activeSubject, setActiveSubject] = useState<number | null>(null);
+  
+  const { 
+    quizzes, 
+    flashcards, 
+    loading, 
+    setLoading, 
+    handleSubjectClick 
+  } = useSubjectContent(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -35,17 +38,14 @@ const Dashboard = () => {
         const activitiesData = await getRecentActivities(5);
         setActivities(activitiesData);
         
+        // If there are subjects, load the first one's content
         if (subjectsData.length > 0) {
           const mathSubject = subjectsData.find(s => s.name === 'Mathematics') || subjectsData[0];
-          setActiveSubject(mathSubject.id);
-          const quizzesData = await getQuizzesBySubject(mathSubject.id);
-          setQuizzes(quizzesData);
-          
-          const flashcardsData = await getFlashcardsBySubject(mathSubject.id);
-          setFlashcards(flashcardsData.map(f => ({
-            question: f.question,
-            answer: f.answer
-          })));
+          if (mathSubject.id) {
+            handleSubjectClick(mathSubject.id);
+          }
+        } else {
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -54,7 +54,6 @@ const Dashboard = () => {
           description: "Failed to load your dashboard data",
           variant: "destructive",
         });
-      } finally {
         setLoading(false);
       }
     };
@@ -62,33 +61,7 @@ const Dashboard = () => {
     if (user) {
       loadDashboardData();
     }
-  }, [user, toast]);
-
-  const handleSubjectClick = async (subjectId: number) => {
-    try {
-      setLoading(true);
-      setActiveSubject(subjectId);
-      const [newQuizzes, newFlashcards] = await Promise.all([
-        getQuizzesBySubject(subjectId),
-        getFlashcardsBySubject(subjectId)
-      ]);
-      
-      setQuizzes(newQuizzes);
-      setFlashcards(newFlashcards.map(f => ({
-        question: f.question,
-        answer: f.answer
-      })));
-    } catch (error) {
-      console.error("Error loading subject data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load subject content",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, toast, handleSubjectClick, setLoading]);
 
   const displayedSubjects = subjects.length > 0 ? subjects : fallbackSubjects;
   const displayedActivities = activities.length > 0 ? activities : fallbackActivities;
@@ -96,28 +69,14 @@ const Dashboard = () => {
   const displayedQuizzes = quizzes.length > 0 ? quizzes : [];
 
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
-      <DashboardHeader />
-      
-      <SubjectsSection 
-        subjects={displayedSubjects} 
-        onSubjectClick={handleSubjectClick} 
-      />
-
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <ContentTabs
-            quizzes={displayedQuizzes}
-            flashcards={displayedFlashcards}
-            loading={loading}
-          />
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <RecentActivity activities={displayedActivities} />
-        </div>
-      </section>
-    </div>
+    <DashboardLayout
+      subjects={displayedSubjects}
+      activities={displayedActivities}
+      quizzes={displayedQuizzes}
+      flashcards={displayedFlashcards}
+      loading={loading}
+      onSubjectClick={handleSubjectClick}
+    />
   );
 };
 
