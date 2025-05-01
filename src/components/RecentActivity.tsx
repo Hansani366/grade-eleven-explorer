@@ -12,6 +12,7 @@ interface Activity {
 
 interface RecentActivityProps {
   activities: Activity[];
+  loading?: boolean;
 }
 
 const ActivityIcon = ({ type }: { type: Activity['type'] }) => {
@@ -25,11 +26,16 @@ const ActivityIcon = ({ type }: { type: Activity['type'] }) => {
   );
 };
 
-const RecentActivity = ({ activities }: RecentActivityProps) => {
+const RecentActivity = ({ activities, loading = false }: RecentActivityProps) => {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-poppins">Recent Activity</CardTitle>
+        <CardTitle className="text-lg font-poppins flex items-center justify-between">
+          Recent Activity
+          {loading && (
+            <span className="text-sm text-gray-500 animate-pulse">Loading...</span>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {activities.map((activity, i) => (
