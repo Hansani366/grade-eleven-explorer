@@ -12,8 +12,6 @@ interface DashboardLayoutProps {
   quizzes: any[];
   flashcards: any[];
   loading: boolean;
-  activitiesLoading?: boolean;
-  contentLoading?: boolean;
   onSubjectClick: (subjectId: number) => void;
 }
 
@@ -23,8 +21,6 @@ const DashboardLayout = ({
   quizzes,
   flashcards,
   loading,
-  activitiesLoading = false,
-  contentLoading = false,
   onSubjectClick
 }: DashboardLayoutProps) => {
   return (
@@ -34,7 +30,6 @@ const DashboardLayout = ({
       <SubjectsSection 
         subjects={subjects} 
         onSubjectClick={onSubjectClick} 
-        loading={loading}
       />
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -42,15 +37,12 @@ const DashboardLayout = ({
           <ContentTabs
             quizzes={quizzes}
             flashcards={flashcards}
-            loading={contentLoading}
+            loading={loading}
           />
         </div>
         
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <RecentActivity 
-            activities={activities} 
-            loading={activitiesLoading} 
-          />
+          <RecentActivity activities={activities} />
         </div>
       </section>
     </div>

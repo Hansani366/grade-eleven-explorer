@@ -7,10 +7,9 @@ import { Subject } from '@/services/types';
 interface SubjectsSectionProps {
   subjects: Subject[];
   onSubjectClick: (subjectId: number) => void;
-  loading?: boolean;
 }
 
-const SubjectsSection = ({ subjects, onSubjectClick, loading = false }: SubjectsSectionProps) => {
+const SubjectsSection = ({ subjects, onSubjectClick }: SubjectsSectionProps) => {
   // Use useMemo to prevent unnecessary re-creation of subject icons
   const subjectsWithIcons = useMemo(() => {
     return subjects.map(subject => ({
@@ -21,14 +20,9 @@ const SubjectsSection = ({ subjects, onSubjectClick, loading = false }: Subjects
 
   return (
     <section className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h3 className="text-xl font-semibold mb-5 font-poppins flex items-center justify-between">
-        <div>
-          <span className="w-1.5 h-5 bg-edu-purple rounded-full mr-2"></span>
-          Your Subjects
-        </div>
-        {loading && (
-          <span className="text-sm text-gray-500 animate-pulse">Loading...</span>
-        )}
+      <h3 className="text-xl font-semibold mb-5 font-poppins flex items-center">
+        <span className="w-1.5 h-5 bg-edu-purple rounded-full mr-2"></span>
+        Your Subjects
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {subjectsWithIcons.map((subject) => (
