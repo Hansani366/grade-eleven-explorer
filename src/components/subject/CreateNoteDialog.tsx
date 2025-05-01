@@ -24,7 +24,7 @@ interface FormData {
 const CreateNoteDialog = ({ open, onOpenChange, subjectId }: Props) => {
   const form = useForm<FormData>();
   const { toast } = useToast();
-  const { user } = useAuth(); // Get the current user from auth context
+  const { user } = useAuth();
 
   const onSubmit = async (data: FormData) => {
     if (!user) {

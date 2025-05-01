@@ -195,20 +195,37 @@ export type Database = {
       subject_notes: {
         Row: {
           Content: string
+          created_at: string | null
           id: string
+          subject_id: number | null
           Title: string
+          user_id: string | null
         }
         Insert: {
           Content: string
+          created_at?: string | null
           id?: string
+          subject_id?: number | null
           Title: string
+          user_id?: string | null
         }
         Update: {
           Content?: string
+          created_at?: string | null
           id?: string
+          subject_id?: number | null
           Title?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subject_notes_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subjects: {
         Row: {

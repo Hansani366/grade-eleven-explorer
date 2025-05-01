@@ -17,20 +17,25 @@ export const useSubjectNotes = (subjectId: number) => {
 
   const fetchNotes = useCallback(async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from('subject_notes')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .order('created_at', { ascending: false });
+    
+    try {
+      const { data, error } = await supabase
+        .from('subject_notes')
+        .select('*')
+        .eq('subject_id', subjectId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching notes:', error);
+      if (error) {
+        console.error('Error fetching notes:', error);
+        return;
+      }
+
+      setNotes(data as Note[] || []);
+    } catch (error) {
+      console.error('Exception fetching notes:', error);
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    setNotes(data || []);
-    setIsLoading(false);
   }, [subjectId]);
 
   useEffect(() => {
